@@ -1,0 +1,48 @@
+{
+  "description": "Market Daily 파이프라인 자동화 훅 (Q2 하네스 엔지니어링)",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"${workspaceFolder}/foreign-macro/pipeline.py\" --no-collect --dry-run",
+            "description": "JSON 파일 저장 후 파이프라인 드라이런 확인"
+          }
+        ]
+      }
+    ]
+  },
+  "notes": {
+    "하네스_엔지니어링_개요": {
+      "개념": "데이터 수집 → 변환 → 생성 → 검증 파이프라인을 자동화하는 오케스트레이션 레이어",
+      "구성요소": {
+        "collect_daily.py": "Stage 1: 데이터 수집 (KRX, yfinance)",
+        "excel_to_data.py": "Stage 1b: Excel 수동 입력 대안",
+        "generate_daily.py": "Stage 3a: 일별 HTML 생성",
+        "generate_html.py":  "Stage 3b: 주간 HTML 생성",
+        "generate_report.py":"Stage 3c: 주간 DOCX 생성",
+        "pipeline.py":       "Stage 4: 오케스트레이터 + 검증",
+        "query_data.py":     "Stage 5: Claude API 데이터 쿼리"
+      },
+      "매일_실행_방법": {
+        "방법1_수동": "python pipeline.py --date YYYYMMDD",
+        "방법2_스케줄러": "Windows 작업 스케줄러에 pipeline.py 등록",
+        "방법3_Vercel": "GitHub push → Vercel 자동 빌드 (build.py 실행)",
+        "방법4_Claude_Code_훅": "Claude Code에서 파일 저장 시 자동 트리거"
+      }
+    },
+    "Claude_Code_훅_사용법": {
+      "설명": "PostToolUse 훅은 Claude가 Write 도구로 파일을 저장할 때 자동 실행됨",
+      "활성화": "Claude Code에서 이 프로젝트를 열면 자동으로 로드됨",
+      "커스터마이징": "matcher를 변경하면 다른 이벤트에 트리거 가능",
+      "사용가능_이벤트": [
+        "PreToolUse  - 도구 실행 전",
+        "PostToolUse - 도구 실행 후",
+        "Stop        - Claude 응답 완료 후",
+        "Notification- 알림 발생 시"
+      ]
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "data_date": "2026-05-11",
+  "items": [
+    {
+      "date": "05/13",
+      "time": "21:30",
+      "country": "미국",
+      "event": "CPI (4월)",
+      "forecast": "3.3%",
+      "previous": "3.4%",
+      "importance": "★★★"
+    },
+    {
+      "date": "05/13",
+      "time": "21:30",
+      "country": "미국",
+      "event": "근원 CPI (4월)",
+      "forecast": "3.0%",
+      "previous": "3.1%",
+      "importance": "★★★"
+    },
+    {
+      "date": "05/14",
+      "time": "00:00",
+      "country": "한국",
+      "event": "한은 금통위",
+      "forecast": "동결",
+      "previous": "3.50%",
+      "importance": "★★★"
+    },
+    {
+      "date": "05/14",
+      "time": "21:30",
+      "country": "미국",
+      "event": "PPI (4월)",
+      "forecast": "2.5%",
+      "previous": "2.7%",
+      "importance": "★★"
+    },
+    {
+      "date": "05/14",
+      "time": "23:00",
+      "country": "미국",
+      "event": "미시간대 소비자심리",
+      "forecast": "62.0",
+      "previous": "60.2",
+      "importance": "★★"
+    },
+    {
+      "date": "05/15",
+      "time": "21:30",
+      "country": "미국",
+      "event": "소매판매 (4월)",
+      "forecast": "+0.2%",
+      "previous": "-0.6%",
+      "importance": "★★"
+    },
+    {
+      "date": "05/15",
+      "time": "21:30",
+      "country": "미국",
+      "event": "필라델피아 연준 제조업",
+      "forecast": "3.5",
+      "previous": "2.6",
+      "importance": "★★"
+    },
+    {
+      "date": "05/16",
+      "time": "21:30",
+      "country": "미국",
+      "event": "주택착공 (4월)",
+      "forecast": "135만",
+      "previous": "132만",
+      "importance": "★"
+    }
+  ],
+  "note": "★★★: 고중요도 / ★★: 중간 / ★: 낮음 | 시간: ET 기준"
+}

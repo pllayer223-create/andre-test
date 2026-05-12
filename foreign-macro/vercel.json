@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "name": "market-daily",
+  "buildCommand": "python build.py",
+  "outputDirectory": "archive",
+  "installCommand": "pip install -r requirements.txt",
+  "framework": null,
+  "routes": [
+    {
+      "src": "/daily",
+      "dest": "/daily/index.html"
+    },
+    {
+      "src": "/",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}

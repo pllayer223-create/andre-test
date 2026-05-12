@@ -1,0 +1,118 @@
+{
+  "data_date": "2026-05-11",
+  "items": [
+    {
+      "name": "CD 91D",
+      "value": 2.81,
+      "prev_day_bp": -0.3,
+      "ytd_bp": 6.0,
+      "prev_day_str": "▼0.3bp",
+      "ytd_str": "▲6.0bp"
+    },
+    {
+      "name": "통안채 1Y",
+      "value": 2.852,
+      "prev_day_bp": -0.2,
+      "ytd_bp": 3.4,
+      "prev_day_str": "▼0.2bp",
+      "ytd_str": "▲3.4bp"
+    },
+    {
+      "name": "통안채 2Y",
+      "value": 3.495,
+      "prev_day_bp": -0.6,
+      "ytd_bp": 6.2,
+      "prev_day_str": "▼0.6bp",
+      "ytd_str": "▲6.2bp"
+    },
+    {
+      "name": "국고채 3Y",
+      "value": 3.592,
+      "prev_day_bp": 0.9,
+      "ytd_bp": 6.4,
+      "prev_day_str": "▲0.9bp",
+      "ytd_str": "▲6.4bp"
+    },
+    {
+      "name": "국고채 5Y",
+      "value": 3.772,
+      "prev_day_bp": -0.5,
+      "ytd_bp": 3.7,
+      "prev_day_str": "▼0.5bp",
+      "ytd_str": "▲3.7bp"
+    },
+    {
+      "name": "국고채 10Y",
+      "value": 3.95,
+      "prev_day_bp": 1.2,
+      "ytd_bp": 6.5,
+      "prev_day_str": "▲1.2bp",
+      "ytd_str": "▲6.5bp"
+    },
+    {
+      "name": "은행채 3M",
+      "value": 2.748,
+      "prev_day_bp": 2.1,
+      "ytd_bp": -6.2,
+      "prev_day_str": "▲2.1bp",
+      "ytd_str": "▼6.2bp"
+    },
+    {
+      "name": "은행채 1Y",
+      "value": 3.202,
+      "prev_day_bp": 0.5,
+      "ytd_bp": 1.6,
+      "prev_day_str": "▲0.5bp",
+      "ytd_str": "▲1.6bp"
+    },
+    {
+      "name": "은행채 2Y",
+      "value": 3.673,
+      "prev_day_bp": 0.7,
+      "ytd_bp": 9.4,
+      "prev_day_str": "▲0.7bp",
+      "ytd_str": "▲9.4bp"
+    },
+    {
+      "name": "은행채 3Y",
+      "value": 3.886,
+      "prev_day_bp": -0.7,
+      "ytd_bp": 8.1,
+      "prev_day_str": "▼0.7bp",
+      "ytd_str": "▲8.1bp"
+    },
+    {
+      "name": "은행채 5Y",
+      "value": 4.052,
+      "prev_day_bp": -0.5,
+      "ytd_bp": 5.6,
+      "prev_day_str": "▼0.5bp",
+      "ytd_str": "▲5.6bp"
+    },
+    {
+      "name": "회사채 1Y (AA)",
+      "value": 3.423,
+      "prev_day_bp": 1.0,
+      "ytd_bp": 8.0,
+      "prev_day_str": "▲1.0bp",
+      "ytd_str": "▲8.0bp"
+    },
+    {
+      "name": "회사채 3Y (AA)",
+      "value": 4.177,
+      "prev_day_bp": -0.7,
+      "ytd_bp": 16.8,
+      "prev_day_str": "▼0.7bp",
+      "ytd_str": "▲16.8bp"
+    },
+    {
+      "name": "기타금융채 2Y (AA-)",
+      "value": 4.085,
+      "prev_day_bp": 0.8,
+      "ytd_bp": 8.0,
+      "prev_day_str": "▲0.8bp",
+      "ytd_str": "▲8.0bp"
+    }
+  ],
+  "source": "https://data.krx.co.kr"
+}

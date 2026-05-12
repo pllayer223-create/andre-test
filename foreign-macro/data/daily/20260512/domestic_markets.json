@@ -1,0 +1,38 @@
+{
+  "data_date": "2026-05-11",
+  "items": [
+    {
+      "name": "KOSPI",
+      "value": 7822.24,
+      "prev_day_pct": 1.0,
+      "ytd_pct": 85.6,
+      "prev_day_str": "▲1.0%",
+      "ytd_str": "▲85.6%"
+    },
+    {
+      "name": "KOSPI 200",
+      "value": 1211.44,
+      "prev_day_pct": 1.0,
+      "ytd_pct": 99.6,
+      "prev_day_str": "▲1.0%",
+      "ytd_str": "▲99.6%"
+    },
+    {
+      "name": "KOSDAQ",
+      "value": 1207.34,
+      "prev_day_pct": 0.9,
+      "ytd_pct": 30.5,
+      "prev_day_str": "▲0.9%",
+      "ytd_str": "▲30.5%"
+    },
+    {
+      "name": "USDKRW",
+      "value": 1472.4,
+      "prev_day_pct": 0.1,
+      "ytd_pct": 2.3,
+      "prev_day_str": "▲0.1%",
+      "ytd_str": "▲2.3%"
+    }
+  ],
+  "source": "https://data.krx.co.kr"
+}

@@ -1,0 +1,37 @@
+{
+  "data_date": "2026-05-11",
+  "unit": "억원",
+  "items": [
+    {
+      "market": "KOSPI",
+      "foreign": -28147,
+      "institution": -458,
+      "individual": 28669
+    },
+    {
+      "market": "KOSDAQ",
+      "foreign": 1160,
+      "institution": -1630,
+      "individual": 847
+    },
+    {
+      "market": "KOSPI 200 선물",
+      "foreign": -9201,
+      "institution": 11544,
+      "individual": -2313
+    },
+    {
+      "market": "국채 3년 선물",
+      "foreign": 9802,
+      "institution": -9937,
+      "individual": 136
+    },
+    {
+      "market": "국채 10년 선물",
+      "foreign": 4544,
+      "institution": -5063,
+      "individual": 500
+    }
+  ],
+  "source": "https://data.krx.co.kr"
+}

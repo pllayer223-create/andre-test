@@ -1,0 +1,42 @@
+{
+  "data_date": "2026-05-06",
+  "items": [
+    {
+      "date": "05/06",
+      "time": "22:00",
+      "country": "미국",
+      "event": "공장주문 (3월)",
+      "forecast": "+0.8%",
+      "previous": "-0.3%",
+      "importance": "★"
+    },
+    {
+      "date": "05/07",
+      "time": "21:15",
+      "country": "미국",
+      "event": "ADP 고용 (4월)",
+      "forecast": "+110K",
+      "previous": "+134K",
+      "importance": "★★"
+    },
+    {
+      "date": "05/07",
+      "time": "21:30",
+      "country": "미국",
+      "event": "무역수지 (3월)",
+      "forecast": "-$95B",
+      "previous": "-$92B",
+      "importance": "★★"
+    },
+    {
+      "date": "05/08",
+      "time": "00:00",
+      "country": "유럽",
+      "event": "ECB 통화정책 회의",
+      "forecast": "동결",
+      "previous": "2.50%",
+      "importance": "★★★"
+    }
+  ],
+  "note": "★★★: 고중요도 / ★★: 중간 / ★: 낮음 | 시간: ET 기준"
+}

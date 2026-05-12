@@ -1,0 +1,98 @@
+{
+  "data_date": "2026-05-08",
+  "stocks": [
+    {
+      "name": "DOW",
+      "value": 49363.51,
+      "prev_day_pct": 2.6,
+      "ytd_pct": 10.2,
+      "prev_day_str": "▲2.6%",
+      "ytd_str": "▲10.2%"
+    },
+    {
+      "name": "S&P 500",
+      "value": 7370.78,
+      "prev_day_pct": 0.7,
+      "ytd_pct": 7.6,
+      "prev_day_str": "▲0.7%",
+      "ytd_str": "▲7.6%"
+    },
+    {
+      "name": "NASDAQ",
+      "value": 26367.08,
+      "prev_day_pct": 1.5,
+      "ytd_pct": 13.7,
+      "prev_day_str": "▲1.5%",
+      "ytd_str": "▲13.7%"
+    },
+    {
+      "name": "일본 니케이 225",
+      "value": 62325.24,
+      "prev_day_pct": -0.0,
+      "ytd_pct": 23.9,
+      "prev_day_str": "▲0.0%",
+      "ytd_str": "▲23.9%"
+    },
+    {
+      "name": "홍콩 항셍 H",
+      "value": 8822.67,
+      "prev_day_pct": 0.6,
+      "ytd_pct": -1.0,
+      "prev_day_str": "▲0.6%",
+      "ytd_str": "▼1.0%"
+    },
+    {
+      "name": "독일 DAX",
+      "value": 23976.86,
+      "prev_day_pct": 0.9,
+      "ytd_pct": -2.1,
+      "prev_day_str": "▲0.9%",
+      "ytd_str": "▼2.1%"
+    }
+  ],
+  "fx": [
+    {
+      "name": "달러인덱스",
+      "value": 96.16,
+      "prev_day_pct": 0.1,
+      "ytd_pct": -2.1,
+      "prev_day_str": "▲0.1%",
+      "ytd_str": "▼2.1%"
+    },
+    {
+      "name": "USDJPY",
+      "value": 156.24,
+      "prev_day_pct": -1.1,
+      "ytd_pct": -0.3,
+      "prev_day_str": "▼1.1%",
+      "ytd_str": "▼0.3%"
+    },
+    {
+      "name": "EURUSD",
+      "value": 1.18,
+      "prev_day_pct": 1.7,
+      "ytd_pct": 0.5,
+      "prev_day_str": "▲1.7%",
+      "ytd_str": "▲0.5%"
+    }
+  ],
+  "crypto": [
+    {
+      "name": "비트코인(USD)",
+      "value": 81032.0,
+      "prev_day_pct": 1.4,
+      "ytd_pct": -7.3,
+      "prev_day_str": "▲1.4%",
+      "ytd_str": "▼7.3%"
+    },
+    {
+      "name": "이더리움(USD)",
+      "value": 2316.0,
+      "prev_day_pct": -0.5,
+      "ytd_pct": -22.1,
+      "prev_day_str": "▼0.5%",
+      "ytd_str": "▼22.1%"
+    }
+  ],
+  "source": "https://investing.com"
+}

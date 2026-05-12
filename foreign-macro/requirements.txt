@@ -1,2 +1,14 @@
+# 기존 의존성
 python-docx==1.2.0
 lxml==6.1.0
+
+# Q1: Excel 데이터 임포트
+openpyxl>=3.1.0
+
+# Q3: Claude API 자연어 쿼리
+anthropic>=0.40.0
+
+# Q5/Q6/Q7: 데이터 수집 (collect_daily.py)
+requests>=2.31.0
+yfinance>=0.2.40
+beautifulsoup4>=4.12.0

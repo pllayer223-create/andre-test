@@ -1,0 +1,42 @@
+{
+  "data_date": "2026-05-05",
+  "items": [
+    {
+      "date": "05/05",
+      "time": "23:00",
+      "country": "미국",
+      "event": "ISM 서비스업 (4월)",
+      "forecast": "52.5",
+      "previous": "53.4",
+      "importance": "★★★"
+    },
+    {
+      "date": "05/06",
+      "time": "22:00",
+      "country": "미국",
+      "event": "공장주문 (3월)",
+      "forecast": "+0.8%",
+      "previous": "-0.3%",
+      "importance": "★"
+    },
+    {
+      "date": "05/07",
+      "time": "21:15",
+      "country": "미국",
+      "event": "ADP 고용 (4월)",
+      "forecast": "+110K",
+      "previous": "+134K",
+      "importance": "★★"
+    },
+    {
+      "date": "05/05",
+      "time": "09:00",
+      "country": "한국",
+      "event": "한국 CPI (4월)",
+      "forecast": "3.2%",
+      "previous": "3.1%",
+      "importance": "★★★"
+    }
+  ],
+  "note": "★★★: 고중요도 / ★★: 중간 / ★: 낮음 | 시간: ET 기준"
+}

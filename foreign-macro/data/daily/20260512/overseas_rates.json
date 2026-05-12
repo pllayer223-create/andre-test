@@ -1,0 +1,46 @@
+{
+  "data_date": "2026-05-11",
+  "items": [
+    {
+      "name": "미국 2Y",
+      "value": 3.956,
+      "prev_day_bp": 0.1,
+      "ytd_bp": 48.3,
+      "prev_day_str": "▲0.1bp",
+      "ytd_str": "▲48.3bp"
+    },
+    {
+      "name": "미국 10Y",
+      "value": 4.414,
+      "prev_day_bp": 1.2,
+      "ytd_bp": 24.5,
+      "prev_day_str": "▲1.2bp",
+      "ytd_str": "▲24.5bp"
+    },
+    {
+      "name": "미국 30Y",
+      "value": 4.988,
+      "prev_day_bp": -0.3,
+      "ytd_bp": 14.1,
+      "prev_day_str": "▼0.3bp",
+      "ytd_str": "▲14.1bp"
+    },
+    {
+      "name": "독일 10Y",
+      "value": 3.047,
+      "prev_day_bp": 0.2,
+      "ytd_bp": 18.9,
+      "prev_day_str": "▲0.2bp",
+      "ytd_str": "▲18.9bp"
+    },
+    {
+      "name": "일본 10Y",
+      "value": 2.525,
+      "prev_day_bp": 0.2,
+      "ytd_bp": 45.2,
+      "prev_day_str": "▲0.2bp",
+      "ytd_str": "▲45.2bp"
+    }
+  ],
+  "source": "https://investing.com"
+}

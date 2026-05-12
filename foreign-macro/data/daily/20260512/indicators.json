@@ -1,0 +1,54 @@
+{
+  "data_date": "2026-05-11",
+  "items": [
+    {
+      "name": "미국 비농업취업자",
+      "date": "05/02",
+      "actual": "+115K",
+      "forecast": "+62K",
+      "previous": "+125K",
+      "eval": "상회"
+    },
+    {
+      "name": "미국 실업률",
+      "date": "05/02",
+      "actual": "4.2%",
+      "forecast": "4.3%",
+      "previous": "4.2%",
+      "eval": "부합"
+    },
+    {
+      "name": "미국 PCE (전년비)",
+      "date": "04/30",
+      "actual": "2.6%",
+      "forecast": "2.5%",
+      "previous": "2.7%",
+      "eval": "상회"
+    },
+    {
+      "name": "미국 ISM 서비스업",
+      "date": "05/05",
+      "actual": "54.2",
+      "forecast": "52.5",
+      "previous": "53.4",
+      "eval": "상회"
+    },
+    {
+      "name": "한국 CPI (전년비)",
+      "date": "05/02",
+      "actual": "3.1%",
+      "forecast": "3.0%",
+      "previous": "3.2%",
+      "eval": "상회"
+    },
+    {
+      "name": "유로존 CPI (전년비)",
+      "date": "04/30",
+      "actual": "2.3%",
+      "forecast": "2.2%",
+      "previous": "2.4%",
+      "eval": "상회"
+    }
+  ],
+  "note": "실제치>예상치: 상회 / 실제치=예상치: 부합 / 실제치<예상치: 하회"
+}

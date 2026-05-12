@@ -1,0 +1,51 @@
+{
+  "data_date": "2026-05-08",
+  "items": [
+    {
+      "date": "05/09",
+      "time": "21:30",
+      "country": "미국",
+      "event": "비농업취업자 (4월)",
+      "forecast": "+62K",
+      "previous": "+125K",
+      "importance": "★★★"
+    },
+    {
+      "date": "05/09",
+      "time": "21:30",
+      "country": "미국",
+      "event": "실업률 (4월)",
+      "forecast": "4.3%",
+      "previous": "4.2%",
+      "importance": "★★★"
+    },
+    {
+      "date": "05/09",
+      "time": "21:30",
+      "country": "미국",
+      "event": "평균임금 (전년비)",
+      "forecast": "3.9%",
+      "previous": "4.0%",
+      "importance": "★★"
+    },
+    {
+      "date": "05/12",
+      "time": "10:00",
+      "country": "한국",
+      "event": "수출입 동향 (4월)",
+      "forecast": "+4.0%",
+      "previous": "+3.1%",
+      "importance": "★★"
+    },
+    {
+      "date": "05/12",
+      "time": "21:30",
+      "country": "미국",
+      "event": "CPI 선행 지표",
+      "forecast": "—",
+      "previous": "—",
+      "importance": "★"
+    }
+  ],
+  "note": "★★★: 고중요도 / ★★: 중간 / ★: 낮음 | 시간: ET 기준"
+}

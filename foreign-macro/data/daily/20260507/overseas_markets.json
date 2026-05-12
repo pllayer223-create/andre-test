@@ -1,0 +1,98 @@
+{
+  "data_date": "2026-05-06",
+  "stocks": [
+    {
+      "name": "DOW",
+      "value": 47546.26,
+      "prev_day_pct": 2.6,
+      "ytd_pct": 6.1,
+      "prev_day_str": "▲2.6%",
+      "ytd_str": "▲6.1%"
+    },
+    {
+      "name": "S&P 500",
+      "value": 7268.93,
+      "prev_day_pct": 0.6,
+      "ytd_pct": 6.1,
+      "prev_day_str": "▲0.6%",
+      "ytd_str": "▲6.1%"
+    },
+    {
+      "name": "NASDAQ",
+      "value": 25442.45,
+      "prev_day_pct": 0.4,
+      "ytd_pct": 9.7,
+      "prev_day_str": "▲0.4%",
+      "ytd_str": "▲9.7%"
+    },
+    {
+      "name": "일본 니케이 225",
+      "value": 61991.23,
+      "prev_day_pct": 1.8,
+      "ytd_pct": 23.2,
+      "prev_day_str": "▲1.8%",
+      "ytd_str": "▲23.2%"
+    },
+    {
+      "name": "홍콩 항셍 H",
+      "value": 8592.01,
+      "prev_day_pct": 0.4,
+      "ytd_pct": -3.6,
+      "prev_day_str": "▲0.4%",
+      "ytd_str": "▼3.6%"
+    },
+    {
+      "name": "독일 DAX",
+      "value": 23785.4,
+      "prev_day_pct": 2.4,
+      "ytd_pct": -2.9,
+      "prev_day_str": "▲2.4%",
+      "ytd_str": "▼2.9%"
+    }
+  ],
+  "fx": [
+    {
+      "name": "달러인덱스",
+      "value": 95.27,
+      "prev_day_pct": 0.5,
+      "ytd_pct": -3.0,
+      "prev_day_str": "▲0.5%",
+      "ytd_str": "▼3.0%"
+    },
+    {
+      "name": "USDJPY",
+      "value": 160.27,
+      "prev_day_pct": 2.2,
+      "ytd_pct": 2.3,
+      "prev_day_str": "▲2.2%",
+      "ytd_str": "▲2.3%"
+    },
+    {
+      "name": "EURUSD",
+      "value": 1.15,
+      "prev_day_pct": 3.6,
+      "ytd_pct": -2.1,
+      "prev_day_str": "▲3.6%",
+      "ytd_str": "▼2.1%"
+    }
+  ],
+  "crypto": [
+    {
+      "name": "비트코인(USD)",
+      "value": 80363.0,
+      "prev_day_pct": -0.0,
+      "ytd_pct": -8.1,
+      "prev_day_str": "▲0.0%",
+      "ytd_str": "▼8.1%"
+    },
+    {
+      "name": "이더리움(USD)",
+      "value": 2279.0,
+      "prev_day_pct": 0.2,
+      "ytd_pct": -23.3,
+      "prev_day_str": "▲0.2%",
+      "ytd_str": "▼23.3%"
+    }
+  ],
+  "source": "https://investing.com"
+}

@@ -1,0 +1,38 @@
+{
+  "data_date": "2026-05-08",
+  "items": [
+    {
+      "name": "미국 ADP 고용",
+      "date": "05/07",
+      "actual": "+98K",
+      "forecast": "+110K",
+      "previous": "+134K",
+      "eval": "하회"
+    },
+    {
+      "name": "미국 주간 실업청구",
+      "date": "05/08",
+      "actual": "218K",
+      "forecast": "225K",
+      "previous": "222K",
+      "eval": "부합"
+    },
+    {
+      "name": "미국 ISM 제조업",
+      "date": "05/01",
+      "actual": "49.2",
+      "forecast": "48.5",
+      "previous": "49.0",
+      "eval": "상회"
+    },
+    {
+      "name": "한국 수출 (전년비)",
+      "date": "05/01",
+      "actual": "+4.5%",
+      "forecast": "+3.2%",
+      "previous": "+3.1%",
+      "eval": "상회"
+    }
+  ],
+  "note": "실제치>예상치: 상회 / 실제치=예상치: 부합 / 실제치<예상치: 하회"
+}

@@ -134,6 +134,20 @@ tbody td:first-child{text-align:left;font-weight:500}
             border:1px solid var(--border);border-radius:var(--radius);padding:14px}
 .chart-note{font-size:11px;color:var(--gray);margin-top:6px;font-style:italic}
 
+/* MULTI-CHART */
+.multi-checks{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.multi-checks label{display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;
+                     background:#fff;border:1px solid var(--border);border-radius:5px;
+                     padding:3px 8px;transition:background .15s}
+.multi-checks label:hover{background:#F1F5F9}
+.multi-checks label.checked{background:var(--blue-lt);border-color:var(--blue2)}
+.legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;flex-shrink:0}
+.chart-compare-wrap{position:relative;height:320px;background:var(--card);
+                     border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.btn-update{background:var(--blue2);color:#fff;border:none;border-radius:6px;
+            padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn-update:hover{background:var(--blue)}
+
 /* TIMELINE (calendar) */
 .timeline{display:flex;flex-direction:column;gap:6px}
 .tl-row{display:grid;grid-template-columns:80px 60px 50px 1fr auto auto;
@@ -270,10 +284,9 @@ footer{border-top:1px solid var(--border);padding:20px;text-align:center;
 
 <!-- S6 과거 데이터 차트 -->
 <section id="s6">
-  <div class="section-title">⑥ 과거 데이터 (약 3년)</div>
+  <div class="section-title">⑥ 과거 데이터 — 단일 차트</div>
   <div class="data-note">
-    💡 아래 차트는 2023년 5월~2026년 5월 월별 데이터입니다.
-    데이터 갱신은 <code>data/historical_data.json</code>의 <code>values</code> 배열을 수정하세요.
+    💡 2023년 5월~2026년 5월 월별 데이터. 단일 지표 확인은 아래 드롭다운을, 복수 비교는 ⑦ 섹션을 사용하세요.
   </div>
   <div class="chart-toolbar">
     <label style="font-size:12px;font-weight:600">지표 선택:</label>
@@ -291,6 +304,19 @@ footer{border-top:1px solid var(--border);padding:20px;text-align:center;
   </div>
   <div class="chart-wrap"><canvas id="hist-chart"></canvas></div>
   <p class="chart-note" id="hist-note"></p>
+</section>
+
+<!-- S7 멀티 차트 비교 -->
+<section id="s7">
+  <div class="section-title">⑦ 과거 데이터 — 멀티 차트 비교</div>
+  <div class="data-note">
+    💡 여러 지표를 동시에 선택해 비교할 수 있습니다. 가격 계열(좌측 Y축)과 금리 계열(우측 Y축)이 자동으로 분리됩니다.
+  </div>
+  <div class="multi-checks" id="compare-checks"></div>
+  <div style="margin-bottom:14px">
+    <button class="btn-update" onclick="renderCompareChart()">차트 업데이트</button>
+  </div>
+  <div class="chart-compare-wrap"><canvas id="compare-chart"></canvas></div>
 </section>
 
 </main>
@@ -344,7 +370,7 @@ function initAccordions() {
   });
 }
 
-/* ── 히스토리컬 차트 ── */
+/* ── 히스토리컬 차트 (단일) ── */
 function renderHistChart(seriesKey) {
   const cfg = HIST[seriesKey];
   if (!cfg) return;
@@ -360,30 +386,111 @@ function renderHistChart(seriesKey) {
         data: cfg.values,
         borderColor: '#2E74B5',
         backgroundColor: 'rgba(46,116,181,0.08)',
-        borderWidth: 2,
-        pointRadius: 2,
-        pointHoverRadius: 5,
-        fill: true,
-        tension: 0.3
+        borderWidth: 2, pointRadius: 2, pointHoverRadius: 5,
+        fill: true, tension: 0.3
       }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { labels: { font: { family: "'Malgun Gothic', sans-serif", size: 12 }, color: '#1E293B' } },
-        tooltip: { callbacks: {
-          label: ctx => ` ${ctx.parsed.y.toLocaleString()} ${cfg.unit}`
-        }}
+        tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y.toLocaleString()} ${cfg.unit}` } }
       },
       scales: {
         x: { ticks: { font: { size: 10 }, maxTicksLimit: 12 }, grid: { color: '#F1F5F9' } },
         y: { ticks: { font: { size: 10 }, callback: v => v.toLocaleString() + ' ' + cfg.unit },
-              grid: { color: '#F1F5F9' } }
+             grid: { color: '#F1F5F9' } }
       }
     }
   });
   const noteEl = document.getElementById('hist-note');
   if (noteEl && cfg.source) noteEl.innerHTML = `출처: <a href="${cfg.source}" target="_blank" rel="noopener" style="color:var(--blue2)">${cfg.source}</a>`;
+}
+
+/* ── 멀티 차트 비교 ── */
+const CHART_COLORS = [
+  '#2E74B5','#C00000','#1D7A2A','#D97706','#7C3AED',
+  '#0891B2','#BE185D','#065F46','#92400E','#1E293B'
+];
+let compareChart = null;
+
+function buildCompareChecks() {
+  const wrap = document.getElementById('compare-checks');
+  if (!wrap) return;
+  let idx = 0;
+  Object.entries(HIST).forEach(([k, v]) => {
+    if (k === 'labels' || k === '_note' || typeof v !== 'object') return;
+    const color = CHART_COLORS[idx % CHART_COLORS.length];
+    const checked = idx < 2 ? 'checked' : '';
+    wrap.innerHTML += `<label id="lbl_${k}" class="${checked ? 'checked' : ''}">
+      <input type="checkbox" value="${k}" ${checked}
+             onchange="this.closest('label').classList.toggle('checked',this.checked)">
+      <span class="legend-dot" style="background:${color}"></span>
+      ${v.label}
+    </label>`;
+    idx++;
+  });
+}
+
+function renderCompareChart() {
+  const ctx = document.getElementById('compare-chart');
+  if (!ctx) return;
+  if (compareChart) compareChart.destroy();
+
+  const selected = [...document.querySelectorAll('#compare-checks input:checked')]
+    .map(cb => cb.value);
+  if (selected.length === 0) { alert('지표를 1개 이상 선택하세요.'); return; }
+
+  const datasets = selected.map((k, i) => {
+    const cfg   = HIST[k];
+    const color = CHART_COLORS[i % CHART_COLORS.length];
+    const isRate = cfg.unit === '%' || cfg.unit === '%p';
+    return {
+      label: cfg.label + ` (${cfg.unit})`,
+      data: cfg.values,
+      borderColor: color,
+      backgroundColor: 'transparent',
+      borderWidth: 2, pointRadius: 1, pointHoverRadius: 5,
+      tension: 0.3,
+      yAxisID: isRate ? 'yRate' : 'yPrice',
+    };
+  });
+
+  const hasRate  = datasets.some(d => d.yAxisID === 'yRate');
+  const hasPrice = datasets.some(d => d.yAxisID === 'yPrice');
+
+  compareChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: HIST.labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { font: { family: "'Malgun Gothic',sans-serif", size: 11 }, color: '#1E293B' } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const unit = ctx.dataset.label.match(/\(([^)]+)\)/)?.[1] || '';
+              return ` ${ctx.dataset.label.split('(')[0].trim()}: ${ctx.parsed.y?.toLocaleString()} ${unit}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { font: { size: 10 }, maxTicksLimit: 12 }, grid: { color: '#F1F5F9' } },
+        yPrice: {
+          type: 'linear', position: 'left', display: hasPrice,
+          ticks: { font: { size: 10 }, callback: v => v.toLocaleString() },
+          grid: { color: '#F1F5F9' }
+        },
+        yRate: {
+          type: 'linear', position: hasPrice ? 'right' : 'left', display: hasRate,
+          ticks: { font: { size: 10 }, callback: v => v.toFixed(2) + '%' },
+          grid: { drawOnChartArea: !hasPrice }
+        },
+      }
+    }
+  });
 }
 
 /* ── 전체 렌더링 ── */
@@ -606,6 +713,10 @@ document.addEventListener('DOMContentLoaded', () => {
     hsel.addEventListener('change', e => renderHistChart(e.target.value));
     renderHistChart(hsel.value);
   }
+
+  /* 멀티 차트 비교 초기화 */
+  buildCompareChecks();
+  renderCompareChart();
 
   initTabs();
   renderAll();

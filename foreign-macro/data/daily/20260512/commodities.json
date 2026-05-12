@@ -1,0 +1,54 @@
+{
+  "data_date": "2026-05-11",
+  "items": [
+    {
+      "name": "WTI",
+      "value": 98.07,
+      "prev_day_pct": 0.3,
+      "ytd_pct": 71.0,
+      "prev_day_str": "▲0.3%",
+      "ytd_str": "▲71.0%"
+    },
+    {
+      "name": "BRENT",
+      "value": 104.21,
+      "prev_day_pct": 2.3,
+      "ytd_pct": 70.9,
+      "prev_day_str": "▲2.3%",
+      "ytd_str": "▲70.9%"
+    },
+    {
+      "name": "금",
+      "value": 4731.0,
+      "prev_day_pct": 1.1,
+      "ytd_pct": 4.0,
+      "prev_day_str": "▲1.1%",
+      "ytd_str": "▲4.0%"
+    },
+    {
+      "name": "은",
+      "value": 80.87,
+      "prev_day_pct": 0.3,
+      "ytd_pct": 4.6,
+      "prev_day_str": "▲0.3%",
+      "ytd_str": "▲4.6%"
+    },
+    {
+      "name": "PHIL 반도체지수",
+      "value": 12081.0,
+      "prev_day_pct": -0.1,
+      "ytd_pct": 68.4,
+      "prev_day_str": "▼0.1%",
+      "ytd_str": "▲68.4%"
+    },
+    {
+      "name": "구리",
+      "value": 13720.0,
+      "prev_day_pct": 1.0,
+      "ytd_pct": 11.6,
+      "prev_day_str": "▲1.0%",
+      "ytd_str": "▲11.6%"
+    }
+  ],
+  "source": "https://investing.com"
+}
