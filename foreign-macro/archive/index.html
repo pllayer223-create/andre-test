@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>주간 해외매크로 보고 대시보드</title>
+<style>
+:root{
+  --blue:#1F497D;--blue2:#2E74B5;--blue-lt:#D6E4F0;
+  --pos:#1D7A2A;--neg:#C00000;--gray:#64748B;
+  --border:#E2E8F0;--bg:#F1F5F9;--card:#FFFFFF;
+  --nav:52px;--radius:10px;
+  --imp-high-bg:#FEF9C3;--imp-mid-bg:#F0F9FF;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+     font-size:13px;line-height:1.6;background:var(--bg);color:#1E293B;padding-top:var(--nav)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--nav);
+    background:var(--blue);display:flex;align-items:center;
+    padding:0 20px;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.nav-brand{font-weight:700;color:#fff;font-size:13px;white-space:nowrap;
+           border-right:1px solid rgba(255,255,255,.3);padding-right:14px;margin-right:6px}
+nav select{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
+           border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;
+           font-family:inherit}
+nav select option{background:#1F497D;color:#fff}
+.nav-links{display:flex;gap:2px;margin-left:auto}
+nav a.nav-item{color:rgba(255,255,255,.85);text-decoration:none;font-size:12px;
+               padding:5px 9px;border-radius:5px;transition:background .15s;white-space:nowrap}
+nav a.nav-item:hover{background:rgba(255,255,255,.2);color:#fff}
+.btn-print{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);
+           border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn-print:hover{background:rgba(255,255,255,.25)}
+
+/* HEADER */
+header{background:linear-gradient(135deg,var(--blue) 0%,var(--blue2) 100%);
+       color:#fff;padding:32px 20px 24px;text-align:center}
+header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+header .meta{margin-top:6px;font-size:12px;opacity:.8}
+header .summary-pill{margin-top:14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+                      border-radius:8px;padding:12px 18px;font-size:13px;font-weight:600;
+                      max-width:860px;margin-left:auto;margin-right:auto;text-align:left;line-height:1.7}
+
+/* LAYOUT */
+main{max-width:980px;margin:0 auto;padding:24px 16px 60px}
+
+/* SECTION */
+section{margin-bottom:36px;scroll-margin-top:calc(var(--nav) + 10px)}
+.section-title{font-size:16px;font-weight:700;color:var(--blue);
+               border-bottom:2px solid var(--blue2);padding-bottom:8px;margin-bottom:16px}
+.sub-title{font-size:13px;font-weight:700;color:var(--blue2);margin:18px 0 10px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+      padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:12px}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:640px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* KPI CHIPS */
+.kpi-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:8px;
+     padding:10px 14px;flex:1;min-width:110px;text-align:center}
+.kpi-label{font-size:11px;color:var(--gray);margin-bottom:2px}
+.kpi-val{font-size:17px;font-weight:700;color:var(--blue)}
+.kpi-chg{font-size:11px;margin-top:2px}
+
+/* TABS */
+.tab-bar{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+.tab-btn{background:#fff;border:1px solid var(--border);border-radius:6px;
+         padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;color:var(--gray);
+         transition:all .15s;font-family:inherit}
+.tab-btn.active{background:var(--blue2);color:#fff;border-color:var(--blue2)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;margin-bottom:6px;border-radius:8px;
+          box-shadow:0 1px 4px rgba(0,0,0,.07)}
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:12px}
+thead tr{background:var(--blue2)}
+thead th{color:#fff;font-weight:700;padding:8px 10px;text-align:center;
+         white-space:nowrap;font-size:11px}
+tbody tr{border-bottom:1px solid var(--border)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:nth-child(even){background:#F8FAFC}
+tbody tr.imp-high{background:var(--imp-high-bg)!important}
+tbody tr.imp-mid{background:var(--imp-mid-bg)!important}
+tbody td{padding:7px 10px;text-align:center;vertical-align:middle}
+tbody td:first-child{text-align:left;font-weight:500}
+.pos{color:var(--pos);font-weight:700}
+.neg{color:var(--neg);font-weight:700}
+
+/* NOTICE */
+.notice{font-size:11px;color:var(--gray);font-style:italic;margin:4px 0 12px 4px}
+
+/* SOURCE LINK */
+.src-link{font-size:10px;color:var(--blue2);text-decoration:none;
+          border:1px solid var(--blue2);border-radius:4px;padding:1px 5px;
+          margin-left:6px;white-space:nowrap}
+.src-link:hover{background:var(--blue2);color:#fff}
+
+/* BADGE */
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;
+       border-radius:4px;white-space:nowrap;flex-shrink:0}
+.badge-fact{background:#DBEAFE;color:#1E40AF}
+.badge-opinion{background:#FEF3C7;color:#92400E}
+
+/* NEWS ACCORDION */
+.news-card{background:var(--card);border:1px solid var(--border);
+           border-left:4px solid var(--blue2);border-radius:var(--radius);
+           margin-bottom:10px;overflow:hidden}
+.news-header{padding:12px 16px;cursor:pointer;display:flex;
+             justify-content:space-between;align-items:center;
+             user-select:none;font-weight:700;font-size:13px;color:var(--blue)}
+.news-header:hover{background:#F8FAFC}
+.news-arrow{font-size:12px;transition:transform .2s;color:var(--blue2)}
+.news-body{padding:0 16px;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+.news-body.open{max-height:600px;padding:4px 16px 14px}
+.news-row{display:flex;gap:8px;align-items:flex-start;padding:5px 0;
+          border-bottom:1px solid #F1F5F9;font-size:12px}
+.news-row:last-child{border-bottom:none;padding-bottom:0}
+.news-src{margin-top:8px;font-size:11px}
+
+/* CHART */
+.chart-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.chart-toolbar select{border:1px solid var(--border);border-radius:6px;
+                       padding:5px 10px;font-size:12px;font-family:inherit;background:#fff}
+.chart-wrap{position:relative;height:280px;background:var(--card);
+            border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.chart-note{font-size:11px;color:var(--gray);margin-top:6px;font-style:italic}
+
+/* TIMELINE (calendar) */
+.timeline{display:flex;flex-direction:column;gap:6px}
+.tl-row{display:grid;grid-template-columns:80px 60px 50px 1fr auto auto;
+        gap:8px;align-items:center;background:var(--card);
+        border:1px solid var(--border);border-radius:8px;padding:8px 12px}
+.tl-row.imp-high{border-left:4px solid #EAB308;background:var(--imp-high-bg)}
+.tl-row.imp-mid{border-left:4px solid var(--blue2);background:var(--imp-mid-bg)}
+.tl-date{font-weight:700;font-size:12px;color:var(--blue)}
+.tl-time{font-size:11px;color:var(--gray)}
+.tl-country{font-size:11px;color:var(--gray)}
+.tl-event{font-size:12px;font-weight:500}
+.tl-forecast{font-size:11px;color:var(--gray);text-align:right}
+.tl-imp{font-size:12px}
+@media(max-width:600px){
+  .tl-row{grid-template-columns:70px 1fr auto;gap:4px}
+  .tl-time,.tl-country,.tl-forecast{display:none}
+}
+
+/* OUTLOOK */
+.outlook-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:640px){.outlook-grid{grid-template-columns:1fr}}
+.outlook-card{background:var(--card);border:1px solid var(--border);
+              border-radius:var(--radius);padding:14px}
+.outlook-card h4{font-size:12px;font-weight:700;color:var(--blue);margin-bottom:8px;
+                  padding-bottom:5px;border-bottom:1px solid var(--border)}
+.outlook-row{display:flex;gap:7px;align-items:flex-start;padding:4px 0;font-size:12px}
+
+/* FED */
+.fed-list{list-style:none}
+.fed-list li{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.fed-list li:last-child{border-bottom:none}
+.fed-label{font-weight:700;color:var(--blue);min-width:90px;white-space:nowrap}
+
+/* CHECKPOINT */
+.cp-list{list-style:none}
+.cp-list li{padding:6px 0 6px 18px;border-bottom:1px solid var(--border);
+            font-size:12px;position:relative}
+.cp-list li::before{content:"→";position:absolute;left:0;color:var(--blue2);font-weight:700}
+.cp-list li:last-child{border-bottom:none}
+
+/* DATA NOTE */
+.data-note{background:#FEF9C3;border:1px solid #FDE047;border-radius:8px;
+           padding:12px 16px;font-size:12px;margin-bottom:16px}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:20px;text-align:center;
+       font-size:11px;color:var(--gray);font-style:italic;margin-top:40px}
+
+/* PRINT */
+@media print{
+  nav,.tab-bar,.chart-toolbar,.btn-print,.news-header .news-arrow{display:none!important}
+  body{padding-top:0;background:#fff;font-size:11px}
+  header{padding:12px;background:#1F497D!important;-webkit-print-color-adjust:exact}
+  .news-body{max-height:none!important;padding:4px 16px 14px!important;display:block!important}
+  .tab-panel{display:block!important}
+  section{margin-bottom:16px}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">해외매크로 대시보드</span>
+  <select id="report-sel" title="보고서 날짜 선택"></select>
+  <div class="nav-links">
+    <a class="nav-item" href="#s1">요약</a>
+    <a class="nav-item" href="#s2">시장</a>
+    <a class="nav-item" href="#s3">뉴스</a>
+    <a class="nav-item" href="#s4">일정</a>
+    <a class="nav-item" href="#s5">시사점</a>
+    <a class="nav-item" href="#s6">과거데이터</a>
+  </div>
+  <button class="btn-print" onclick="window.print()">인쇄</button>
+</nav>
+
+<header>
+  <h1 id="hdr-title">주간 해외매크로 보고</h1>
+  <p class="meta" id="hdr-meta"></p>
+  <div class="summary-pill" id="hdr-summary"></div>
+</header>
+
+<main>
+
+<!-- S1 핵심 지표 KPI -->
+<section id="s1">
+  <div class="section-title">① 핵심 지표 현황</div>
+  <div class="kpi-row" id="kpi-row"></div>
+</section>
+
+<!-- S2 시장 동향 -->
+<section id="s2">
+  <div class="section-title">② 글로벌 금융시장 동향</div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" data-group="mkt" data-panel="tab-stocks">📈 증시</button>
+    <button class="tab-btn" data-group="mkt" data-panel="tab-bonds">📊 채권금리</button>
+    <button class="tab-btn" data-group="mkt" data-panel="tab-comm">🛢 원자재</button>
+    <button class="tab-btn" data-group="mkt" data-panel="tab-fx">💱 외환(FX)</button>
+    <button class="tab-btn" data-group="mkt" data-panel="tab-inds">📋 경제지표</button>
+    <button class="tab-btn" data-group="mkt" data-panel="tab-fed">🏦 연준(Fed)</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-stocks" data-group="mkt"></div>
+  <div class="tab-panel" id="tab-bonds"  data-group="mkt"></div>
+  <div class="tab-panel" id="tab-comm"   data-group="mkt"></div>
+  <div class="tab-panel" id="tab-fx"     data-group="mkt"></div>
+  <div class="tab-panel" id="tab-inds"   data-group="mkt"></div>
+  <div class="tab-panel" id="tab-fed"    data-group="mkt"></div>
+</section>
+
+<!-- S3 이슈 뉴스 -->
+<section id="s3">
+  <div class="section-title">③ 핵심 이슈 뉴스</div>
+  <div id="news-list"></div>
+</section>
+
+<!-- S4 다음 주 일정 -->
+<section id="s4">
+  <div class="section-title">④ 다음 주 경제지표 및 주요 일정</div>
+  <div class="timeline" id="calendar-body"></div>
+  <p class="notice" id="calendar-notice"></p>
+  <div class="sub-title">주요 인사 발언 예정</div>
+  <ul class="cp-list" id="speakers-list"></ul>
+</section>
+
+<!-- S5 시사점 -->
+<section id="s5">
+  <div class="section-title">⑤ 시사점 및 전망</div>
+  <div class="outlook-grid" id="outlook-grid"></div>
+  <div class="sub-title" style="margin-top:16px">다음 주 체크포인트</div>
+  <ul class="cp-list" id="checkpoints"></ul>
+</section>
+
+<!-- S6 과거 데이터 차트 -->
+<section id="s6">
+  <div class="section-title">⑥ 과거 데이터 (약 3년)</div>
+  <div class="data-note">
+    💡 아래 차트는 2023년 5월~2026년 5월 월별 데이터입니다.
+    데이터 갱신은 <code>data/historical_data.json</code>의 <code>values</code> 배열을 수정하세요.
+  </div>
+  <div class="chart-toolbar">
+    <label style="font-size:12px;font-weight:600">지표 선택:</label>
+    <select id="hist-sel">
+      <option value="sp500">S&amp;P 500</option>
+<option value="treasury_10y">미 10년물 국채금리</option>
+<option value="treasury_2y">미 2년물 국채금리</option>
+<option value="wti">WTI 원유</option>
+<option value="gold">금</option>
+<option value="cpi_yoy">미국 CPI (YoY)</option>
+<option value="usd_krw">USD/KRW</option>
+<option value="fed_rate">연준 기준금리 (상단)</option>
+
+    </select>
+  </div>
+  <div class="chart-wrap"><canvas id="hist-chart"></canvas></div>
+  <p class="chart-note" id="hist-note"></p>
+</section>
+
+</main>
+
+<footer>
+  본 보고서는 공개된 자료를 기반으로 정보 제공 목적으로 작성되었습니다.
+  투자 권유 또는 의사결정의 근거로 활용 시 추가적인 검토가 필요합니다.
+  사실(Fact)과 의견(Opinion)은 각 항목에 명시하였습니다.
+</footer>
+
+<script>
+
+const REPORTS = {"2026-05-12": {"meta": {"date": "2026-05-12", "period": "2026.05.05(화) ~ 2026.05.11(월)"}, "summary": "미·이란 전쟁 장기화로 유가가 배럴당 $98~$103까지 상승하며 인플레이션 재점화 우려가 부각된 가운데, 4월 비농업 고용이 예상(+62K)의 거의 두 배인 +115K로 서프라이즈를 기록해 연준 금리 인하 기대가 한층 후퇴했으며, 5/12 미·중 관세 휴전 합의(11월까지 유예)가 금융시장의 리스크온 흐름을 지지했다.", "markets": {"stocks": [{"index": "S&P 500", "close": "7,365.12", "weekly": "+1.46%", "ytd": "+7.0%", "note": "사상 최고치 경신", "source": "https://www.cnbc.com/quotes/.INX"}, {"index": "NASDAQ", "close": "25,838.94", "weekly": "+2.02%", "ytd": "+8.2%", "note": "사상 최고치 경신", "source": "https://www.cnbc.com/quotes/.IXIC"}, {"index": "DOW", "close": "49,609.16", "weekly": "+0.02%", "ytd": "+3.1%", "note": "소폭 상승", "source": "https://www.cnbc.com/quotes/.DJI"}, {"index": "Euro Stoxx 50", "close": "5,911.53", "weekly": "-1.02%", "ytd": "+6.8%", "note": "유럽 에너지 부담", "source": "https://www.investing.com/indices/eu-stoxx50"}, {"index": "FTSE 100", "close": "10,233.07", "weekly": "-0.43%", "ytd": "+4.2%", "note": "에너지주 혼조", "source": "https://www.cnbc.com/quotes/.FTSE"}, {"index": "닛케이 225", "close": "62,417.88", "weekly": "-0.47%", "ytd": "+12.3%", "note": "엔화 약세 지속", "source": "https://www.cnbc.com/quotes/.N225"}, {"index": "KOSPI", "close": "7,501.40", "weekly": "+0.85%", "ytd": "+18.4%", "note": "반도체 수출 호조", "source": "https://www.cnbc.com/quotes/.KS11"}, {"index": "항셍", "close": "23,847.20", "weekly": "+2.15%", "ytd": "+9.7%", "note": "미·중 관세 휴전 수혜", "source": "https://www.cnbc.com/quotes/.HSI"}], "stocks_notice": "S&P 500·NASDAQ 사상 최고치 경신. 84% EPS 비트율(5년 평균 78%)·미·중 관세 휴전이 상승 동력. 유럽·일본은 에너지 비용 부담으로 상대적 부진.", "bonds": [{"maturity": "2년물", "current": "3.90%", "prev_week": "3.90%", "change": "→ 보합", "note": "연준 동결 기조 반영", "source": "https://fred.stlouisfed.org/series/DGS2"}, {"maturity": "10년물", "current": "4.41%", "prev_week": "4.38%", "change": "+3bp", "note": "유가·고용 서프라이즈에 상승", "source": "https://fred.stlouisfed.org/series/DGS10"}, {"maturity": "30년물", "current": "4.95%", "prev_week": "4.95%", "change": "→ 보합", "note": "", "source": "https://fred.stlouisfed.org/series/DGS30"}, {"maturity": "10Y-2Y 스프레드", "current": "51bp", "prev_week": "48bp", "change": "+3bp", "note": "커브 스티프닝", "source": "https://fred.stlouisfed.org/series/T10Y2Y"}], "bonds_notice": "[사실] 고용·에너지 가격 상승으로 10년물 금리 4.41%까지 상승. 연준 기준금리(3.50~3.75%)와의 역전 폭 축소 중.", "commodities": [{"item": "WTI 원유 ($/bbl)", "close": "$98.71", "weekly": "+3.45%", "mom": "+4.2%", "yoy": "+59.3%", "note": "미·이란 전쟁, 호르무즈 봉쇄", "source": "https://www.eia.gov/dnav/pet/pet_pri_spt_s1_d.htm"}, {"item": "Brent 원유 ($/bbl)", "close": "$103.42", "weekly": "+3.12%", "mom": "+4.0%", "yoy": "+57.1%", "note": "배럴당 $103 돌파", "source": "https://tradingeconomics.com/commodity/brent-crude-oil"}, {"item": "천연가스 ($/MMBtu)", "close": "$3.48", "weekly": "+1.75%", "mom": "+8.4%", "yoy": "+22.5%", "note": "에너지 공급 우려 반영", "source": "https://www.eia.gov/naturalgas/"}, {"item": "금 ($/oz)", "close": "$4,699.07", "weekly": "-0.36%", "mom": "-2.7%", "yoy": "N/A", "note": "개전 이후 -11%, 달러·유가 강세에 약세", "source": "https://goldprice.org/"}, {"item": "구리 ($/lb)", "close": "$4.82", "weekly": "+1.20%", "mom": "+1.4%", "yoy": "+8.3%", "note": "금속 전반 소폭 강세", "source": "https://tradingeconomics.com/commodity/copper"}], "commodities_notice": "[사실] 트럼프 5/11 이란 평화안 거부→호르무즈 해협 사실상 봉쇄 지속→유가 급등 구조. 에너지 가격지수 4월 +12.1%(YoY). 금은 유가·달러 강세에 약세 전환.", "fx": [{"pair": "DXY (달러인덱스)", "current": "97.90", "mom": "-1.8%", "yoy": "-3.2%", "note": "이란 리스크·고용 서프라이즈 속 소폭 하락", "source": "https://www.investing.com/indices/usdollar"}, {"pair": "EUR/USD", "current": "1.1050", "mom": "+1.2%", "yoy": "+2.8%", "note": "달러 약세에 유로 강세", "source": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html"}, {"pair": "USD/JPY", "current": "145.20", "mom": "-2.1%", "yoy": "-4.5%", "note": "日銀 추가 인상 기대에 엔화 강세", "source": "https://www.boj.or.jp/en/statistics/market/forex/"}, {"pair": "USD/CNY", "current": "7.2150", "mom": "-0.5%", "yoy": "+1.2%", "note": "관세 휴전으로 위안화 소폭 강세", "source": "https://tradingeconomics.com/china/currency"}, {"pair": "USD/KRW", "current": "1,468.00", "mom": "원화 +0.83%", "yoy": "-4.74%", "note": "반도체 수출 호조·경상흑자 지지", "source": "https://www.bok.or.kr/portal/main/contents.do?menuNo=200218"}], "indicators": [{"name": "미국 비농업 고용(4월)", "date": "5/8", "actual": "+115K", "forecast": "+62K", "prev": "+105K", "yoy": "N/A", "eval": "↑ 대폭 상회 (서프라이즈)", "source": "https://www.bls.gov/news.release/empsit.nr0.htm"}, {"name": "미국 실업률(4월)", "date": "5/8", "actual": "4.3%", "forecast": "4.3%", "prev": "4.3%", "yoy": "N/A", "eval": "→ 보합", "source": "https://www.bls.gov/news.release/empsit.nr0.htm"}, {"name": "미국 시간당 임금(MoM)", "date": "5/8", "actual": "+0.2%", "forecast": "+0.3%", "prev": "+0.2%", "yoy": "+3.9%", "eval": "→ 안정적", "source": "https://www.bls.gov/news.release/empsit.nr0.htm"}, {"name": "미국 CPI 헤드라인(4월)*", "date": "5/12", "actual": "예정", "forecast": "+0.6%", "prev": "+0.9%", "yoy": "+3.7%", "eval": "★ 발표 예정 (에너지 급등)", "source": "https://www.bls.gov/news.release/cpi.nr0.htm"}, {"name": "미국 코어 CPI(4월)*", "date": "5/12", "actual": "예정", "forecast": "+0.3%", "prev": "+0.4%", "yoy": "+2.7%", "eval": "★ 발표 예정", "source": "https://www.bls.gov/news.release/cpi.nr0.htm"}], "indicators_notice": "* 4월 CPI는 5/12(오늘) 발표. 3월 CPI +0.9% MoM (2022.6월 이후 최대), +3.3% YoY 확정치 기준.", "fed": {"rate": "3.50~3.75% (4/29 FOMC 만장일치 동결, 3회 연속 동결)", "next": "2026년 6월 16~17일 (점도표·경제전망 동시 발표)", "gov": "Kevin Warsh 차기 의장 상원 은행위 승인 완료. 파월 의장은 임기 내 이사직 유지 선언.", "market": "시장은 2026년 내 추가 인하 가능성을 점차 낮게 반영. CME FedWatch 기준 2027년 4월 인상 확률 ~40%.", "source_fomc": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm", "source_fedwatch": "https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html"}}, "news": [{"title": "미·이란 전쟁 장기화 — 유가 $100 재돌파", "background": "2026년 2월 말 개전 이후 호르무즈 해협 사실상 봉쇄, 원유 공급 차질 지속.", "progress": "5/11 트럼프 대통령, 이란의 최신 평화안을 '전적으로 받아들일 수 없음'으로 공식 거부. WTI 당일 +3.45%, Brent $103 돌파.", "impact": "에너지 가격지수 4월 YoY +12.1%. 전년 대비 WTI +59.3%. CPI 헤드라인 상승 압력 직접 전이.", "opinion": "협상 교착 장기화 시 유가 $110+ 돌파 가능성 열려 있으며, 이는 인플레이션 재가속→연준 인하 기대 소멸로 이어질 수 있음.", "source_url": "https://www.cnbc.com/2026/05/11/gold-falls-on-oil-driven-inflation-worries-as-usiran-peace-talks-falter.html", "source_label": "CNBC — 5/11"}, {"title": "미·중 관세 휴전 합의 (5/12, 11월까지)", "background": "트럼프 행정부와 중국, 2026.5.12 관세 휴전 합의. 상호 고율 관세를 2026.11.10까지 일시 유예.", "progress": "협상 전 양국 관세: 미→중 145%, 중→미 125% (역사적 최고 수준). 유예 기간 중 미→중 10% 기본 관세만 유지.", "impact": "합의 발표 직후 증시 상승 기여. S&P 500 사상 최고치 경신 동력 중 하나.", "opinion": "11월 유예 종료 후 재협상 결과가 관건. 완전한 관세 해소 없이는 공급망 불확실성 잔존. 트럼프·시 정상회담 예정으로 향후 진전 주목.", "source_url": "https://www.whitehouse.gov/fact-sheets/2025/11/fact-sheet-president-donald-j-trump-strikes-deal-on-economic-and-trade-relations-with-china/", "source_label": "White House — 5/12"}, {"title": "4월 미국 고용 서프라이즈 — 연준 인하 기대 추가 후퇴", "background": "4월 비농업 고용 +115K (예상 +62K). 실업률 4.3% 유지, 임금 +0.2% MoM 안정.", "progress": "예상치의 약 2배 수준. 노동시장 견조→연준이 금리를 급히 내릴 명분 약화.", "impact": "10년물 국채 수익률 4.38→4.41%로 상승. 달러 강세 압력. 주식은 어닝스 서프라이즈(EPS 비트율 84%)와 관세 휴전에 힘입어 상승 병행.", "opinion": "고용+인플레 동시 압박 구조에서 연준의 2026년 인하는 사실상 어려울 것으로 판단. 스태그플레이션 공포보다는 '고성장·고물가' 시나리오로 시장이 소화 중.", "source_url": "https://www.bls.gov/news.release/empsit.nr0.htm", "source_label": "BLS — 5/8"}], "next_week": {"title": "2026.05.18 ~ 05.22", "calendar": [{"date": "5/18(월)", "time": "16:00", "country": "미국", "event": "해외 포트폴리오 투자 (3월)", "forecast": "N/A", "prev": "N/A", "importance": "★☆☆", "source": ""}, {"date": "5/19(화)", "time": "10:00", "country": "미국", "event": "잠정 주택 판매 (4월)", "forecast": "N/A", "prev": "-3.6%", "importance": "★★☆", "source": "https://www.nar.realtor/"}, {"date": "5/20(수)", "time": "14:00", "country": "미국", "event": "FOMC 의사록 공개", "forecast": "—", "prev": "—", "importance": "★★★", "source": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"}, {"date": "5/21(목)", "time": "08:30", "country": "미국", "event": "주택착공·건축허가 (4월)", "forecast": "N/A", "prev": "1.32M", "importance": "★★☆", "source": "https://www.census.gov/construction/nrc/"}, {"date": "5/21(목)", "time": "08:30", "country": "미국", "event": "필라델피아 연준 지수 (5월)", "forecast": "N/A", "prev": "+8.5", "importance": "★★☆", "source": "https://www.philadelphiafed.org/"}, {"date": "5/22(금)", "time": "10:00", "country": "미국", "event": "미시간대 소비자심리 (5월 확정)", "forecast": "N/A", "prev": "62.5", "importance": "★★☆", "source": "https://www.sca.isr.umich.edu/"}], "calendar_notice": "★★★ 시장 민감도 높음 / ★★☆ 주목 / ★☆☆ 참고. 이번 주 CPI 발표 결과가 FOMC 의사록 해석의 핵심 변수.", "speakers": ["FOMC 의사록(5/20): 4/29 회의 당시 인플레·고용 진단, 향후 금리 경로 힌트 주목", "연준 인사 발언: 주중 다수 지역 연방은행 총재 발언 예정 (일정 확인 필요)"]}, "outlook": {"economy": {"fact": "4월 고용 +115K, 실업률 4.3% 유지. 에너지 가격지수 YoY +12.1%.", "opinion": "유가 급등발 인플레이션이 4월 CPI에 반영될 경우 (헤드라인 +3.7% YoY 예상) Fed의 '데이터 의존' 접근법 하에서 인하 타이밍은 2027년 이후로 밀릴 가능성이 높다. 유가가 $110 이상을 지속한다면 스태그플레이션 논쟁이 재점화될 것."}, "monetary": {"fact": "연준 기준금리 3.50~3.75% 동결 유지(3회 연속). 다음 회의 6/16~17.", "opinion": "고용·에너지 더블 서프라이즈로 연내 인하 가능성은 현저히 낮아졌다. Warsh 신임 의장 체제로의 전환 과정에서 정책 방향성 불확실성도 추가 변수."}, "geopolitical": {"fact": "미·이란: 호르무즈 봉쇄 지속, 트럼프 평화안 거부(5/11). 미·중: 관세 휴전 11/10까지.", "opinion": "미·이란 전쟁 해결 없이 유가 안정화 어렵다. 미·중 휴전은 단기 리스크온 요인이지만, 협상 타결 여부가 불투명해 연말 재협상 리스크가 시장에 서서히 반영될 것."}, "checkpoints": ["FOMC 의사록 (5/20): 4/29 회의에서 인플레·고용 진단 수위, 인하 조건 명시 여부", "미·이란 협상 동향: 추가 평화안 또는 확전 시그널", "미·중 관세 이행 세부 내용: 품목별 유예 범위 공식 발표 예정"]}}};
+const HIST    = {"_note": "월별 종가 기준. 2023-05 ~ 2026-05 (37개월). 실제 데이터로 교체 시 각 시계열의 labels/values 배열을 동일 길이로 유지하세요.", "labels": ["2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05"], "sp500": {"label": "S&P 500", "unit": "pt", "source": "https://fred.stlouisfed.org/series/SP500", "values": [4170, 4450, 4580, 4507, 4288, 4193, 4567, 4769, 4845, 5137, 5254, 5035, 5277, 5460, 5522, 5648, 5762, 5705, 5987, 5882, 5996, 5955, 5540, 5611, 5922, 6148, 6340, 6450, 6520, 6700, 6890, 6980, 7050, 6800, 6430, 7200, 7365]}, "treasury_10y": {"label": "미 10년물 국채금리", "unit": "%", "source": "https://fred.stlouisfed.org/series/DGS10", "values": [3.64, 3.84, 3.97, 4.25, 4.57, 4.93, 4.47, 3.97, 4.03, 4.25, 4.2, 4.68, 4.5, 4.36, 4.09, 3.91, 3.75, 4.28, 4.18, 4.52, 4.61, 4.5, 4.23, 4.18, 4.4, 4.28, 4.19, 4.1, 3.98, 4.05, 4.15, 4.25, 4.35, 4.55, 4.6, 4.38, 4.41]}, "treasury_2y": {"label": "미 2년물 국채금리", "unit": "%", "source": "https://fred.stlouisfed.org/series/DGS2", "values": [4.4, 4.87, 4.87, 4.98, 5.03, 5.02, 4.68, 4.43, 4.42, 4.65, 4.62, 4.97, 4.83, 4.71, 4.26, 3.91, 3.51, 4.1, 4.15, 4.24, 4.22, 4.01, 3.89, 3.66, 3.96, 3.88, 3.96, 3.88, 3.53, 4.08, 4.12, 4.24, 4.2, 4.1, 3.95, 3.88, 3.9]}, "wti": {"label": "WTI 원유", "unit": "$/bbl", "source": "https://www.eia.gov/dnav/pet/pet_pri_spt_s1_d.htm", "values": [72.5, 70.6, 81.8, 84.2, 90.8, 86.7, 77.9, 71.7, 73.8, 77.0, 83.2, 85.4, 79.9, 81.5, 77.9, 73.7, 68.2, 70.4, 68.7, 69.5, 75.9, 71.3, 67.4, 62.3, 60.4, 62.5, 65.2, 63.8, 66.4, 68.2, 66.8, 70.2, 69.8, 85.2, 91.5, 93.8, 98.7]}, "gold": {"label": "금", "unit": "$/oz", "source": "https://goldprice.org/", "values": [1976, 1912, 1963, 1940, 1866, 1978, 1980, 2063, 2034, 2034, 2232, 2316, 2327, 2326, 2426, 2502, 2633, 2730, 2647, 2625, 2798, 2858, 3124, 3280, 3342, 3520, 3780, 4050, 4230, 4420, 4560, 4650, 4820, 5100, 5280, 4920, 4699]}, "cpi_yoy": {"label": "미국 CPI (YoY)", "unit": "%", "source": "https://www.bls.gov/news.release/cpi.nr0.htm", "values": [4.0, 3.0, 3.2, 3.7, 3.7, 3.2, 3.1, 3.4, 3.1, 3.2, 3.5, 3.4, 3.3, 3.0, 2.9, 2.5, 2.4, 2.6, 2.7, 2.9, 3.0, 2.8, 2.4, 2.3, 2.4, 2.6, 2.7, 2.5, 2.3, 2.5, 2.7, 2.9, 3.0, 3.1, 3.3, 3.3, 3.7]}, "usd_krw": {"label": "USD/KRW", "unit": "원", "source": "https://www.bok.or.kr/portal/main/contents.do?menuNo=200218", "values": [1325, 1315, 1290, 1330, 1355, 1355, 1295, 1288, 1330, 1335, 1325, 1375, 1360, 1385, 1375, 1340, 1310, 1380, 1405, 1470, 1455, 1430, 1460, 1440, 1380, 1350, 1360, 1345, 1340, 1375, 1395, 1420, 1440, 1520, 1490, 1480, 1468]}, "fed_rate": {"label": "연준 기준금리 (상단)", "unit": "%", "source": "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm", "values": [5.25, 5.25, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.5, 5.0, 5.0, 4.75, 4.5, 4.5, 4.5, 4.25, 4.25, 4.25, 4.0, 4.0, 3.75, 3.75, 3.75, 3.75, 3.75, 3.75, 3.75, 3.75, 3.75, 3.75]}};
+let activeDate = Object.keys(REPORTS).sort().pop();
+let mainChart  = null;
+
+/* ── 날짜 선택 ── */
+function switchReport(date) {
+  activeDate = date;
+  renderAll();
+}
+
+/* ── 탭 ── */
+function initTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bar = btn.closest('.tab-bar');
+      bar.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const group = btn.dataset.group;
+      const panel = btn.dataset.panel;
+      document.querySelectorAll(`[data-group="${group}"]`).forEach(p => {
+        if (p.classList.contains('tab-panel')) p.classList.remove('active');
+      });
+      const target = document.getElementById(panel);
+      if (target) target.classList.add('active');
+    });
+  });
+}
+
+/* ── 뉴스 아코디언 ── */
+function initAccordions() {
+  document.querySelectorAll('.news-header').forEach(hdr => {
+    hdr.addEventListener('click', () => {
+      const body  = hdr.nextElementSibling;
+      const arrow = hdr.querySelector('.news-arrow');
+      const open  = body.classList.toggle('open');
+      arrow.style.transform = open ? 'rotate(90deg)' : '';
+    });
+  });
+}
+
+/* ── 히스토리컬 차트 ── */
+function renderHistChart(seriesKey) {
+  const cfg = HIST[seriesKey];
+  if (!cfg) return;
+  const ctx = document.getElementById('hist-chart');
+  if (!ctx) return;
+  if (mainChart) mainChart.destroy();
+  mainChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: HIST.labels,
+      datasets: [{
+        label: cfg.label + (cfg.unit ? ` (${cfg.unit})` : ''),
+        data: cfg.values,
+        borderColor: '#2E74B5',
+        backgroundColor: 'rgba(46,116,181,0.08)',
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 5,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { font: { family: "'Malgun Gothic', sans-serif", size: 12 }, color: '#1E293B' } },
+        tooltip: { callbacks: {
+          label: ctx => ` ${ctx.parsed.y.toLocaleString()} ${cfg.unit}`
+        }}
+      },
+      scales: {
+        x: { ticks: { font: { size: 10 }, maxTicksLimit: 12 }, grid: { color: '#F1F5F9' } },
+        y: { ticks: { font: { size: 10 }, callback: v => v.toLocaleString() + ' ' + cfg.unit },
+              grid: { color: '#F1F5F9' } }
+      }
+    }
+  });
+  const noteEl = document.getElementById('hist-note');
+  if (noteEl && cfg.source) noteEl.innerHTML = `출처: <a href="${cfg.source}" target="_blank" rel="noopener" style="color:var(--blue2)">${cfg.source}</a>`;
+}
+
+/* ── 전체 렌더링 ── */
+function renderAll() {
+  const d = REPORTS[activeDate];
+  if (!d) return;
+  const meta = d.meta;
+  const m    = d.markets;
+
+  /* 헤더 */
+  document.getElementById('hdr-title').textContent = `주간 해외매크로 보고 — ${meta.date}`;
+  document.getElementById('hdr-meta').textContent  = `보고 기간: ${meta.period}  |  작성일: ${meta.date}`;
+  document.getElementById('hdr-summary').textContent = d.summary;
+
+  /* KPI 칩 */
+  renderKpi(m);
+
+  /* 탭 내용 */
+  renderStocks(m.stocks, m.stocks_notice);
+  renderBonds(m.bonds, m.bonds_notice);
+  renderComm(m.commodities, m.commodities_notice);
+  renderFx(m.fx);
+  renderIndicators(m.indicators, m.indicators_notice);
+  renderFed(m.fed);
+
+  /* 뉴스 */
+  renderNews(d.news);
+
+  /* 다음 주 일정 */
+  renderCalendar(d.next_week);
+
+  /* 시사점 */
+  renderOutlook(d.outlook);
+
+  initAccordions();
+}
+
+function th(text) { return `<th>${esc(text)}</th>`; }
+function esc(t) {
+  if (t == null) return '';
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function valCls(t) {
+  const s = String(t);
+  if (s.startsWith('+') || /상회|상승/.test(s)) return 'pos';
+  if (s.startsWith('-') || /하회|하락/.test(s)) return 'neg';
+  return '';
+}
+function srcLink(url, label) {
+  if (!url) return '';
+  return `<a class="src-link" href="${esc(url)}" target="_blank" rel="noopener">↗ ${esc(label||'출처')}</a>`;
+}
+
+function renderKpi(m) {
+  const sp = m.stocks.find(s => s.index === 'S&P 500') || {};
+  const n10 = m.bonds.find(b => b.maturity === '10년물') || {};
+  const wti = m.commodities.find(c => c.item && c.item.startsWith('WTI')) || {};
+  const krw = m.fx.find(f => f.pair === 'USD/KRW') || {};
+  const el  = document.getElementById('kpi-row');
+  if (!el) return;
+  el.innerHTML = [
+    {l:'S&P 500', v:sp.close||'—', c:sp.weekly||''},
+    {l:'10Y 금리', v:n10.current||'—', c:n10.change||''},
+    {l:'WTI 원유', v:wti.close||'—', c:wti.weekly||''},
+    {l:'USD/KRW', v:krw.current||'—', c:krw.mom||''},
+  ].map(k => `<div class="kpi">
+    <div class="kpi-label">${k.l}</div>
+    <div class="kpi-val">${esc(k.v)}</div>
+    <div class="kpi-chg ${valCls(k.c)}">${esc(k.c)}</div>
+  </div>`).join('');
+}
+
+function tblRows(headers, rows, imp) {
+  const ths = headers.map(h => `<th>${esc(h)}</th>`).join('');
+  const trs = rows.map((r, i) => {
+    const cls = imp ? imp(r) : (i%2===1?'stripe':'');
+    const tds = r.map((v,ci) => {
+      const t   = esc(String(v));
+      const vcls = ci > 0 ? valCls(String(v)) : '';
+      return `<td class="${vcls}">${t}</td>`;
+    }).join('');
+    return `<tr class="${cls}">${tds}</tr>`;
+  }).join('');
+  return `<div class="tbl-wrap"><table><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
+}
+
+function renderStocks(stocks, notice) {
+  const el = document.getElementById('tab-stocks');
+  if (!el) return;
+  const rows = stocks.map(s => [s.index, s.close, s.weekly, s.ytd, s.note]);
+  el.innerHTML = tblRows(['지수','종가','주간 등락','YTD','비고'], rows)
+    + `<p class="notice">※ ${esc(notice)}</p>`
+    + stocks.filter(s=>s.source).map(s => srcLink(s.source, s.index)).join(' ');
+}
+
+function renderBonds(bonds, notice) {
+  const el = document.getElementById('tab-bonds');
+  if (!el) return;
+  const rows = bonds.map(b => [b.maturity, b.current, b.prev_week, b.change, b.note]);
+  el.innerHTML = tblRows(['만기','금주','전주','전주대비','비고'], rows)
+    + `<p class="notice">※ ${esc(notice)}</p>`
+    + bonds.filter(b=>b.source).map(b => srcLink(b.source, b.maturity)).join(' ');
+}
+
+function renderComm(comm, notice) {
+  const el = document.getElementById('tab-comm');
+  if (!el) return;
+  const rows = comm.map(c => [c.item, c.close, c.weekly, c.mom, c.yoy, c.note]);
+  el.innerHTML = tblRows(['품목','금주 종가','주간 등락','전월비','전년비','비고'], rows)
+    + `<p class="notice">※ ${esc(notice)}</p>`
+    + comm.filter(c=>c.source).map(c => srcLink(c.source, c.item.split(' ')[0])).join(' ');
+}
+
+function renderFx(fx) {
+  const el = document.getElementById('tab-fx');
+  if (!el) return;
+  const rows = fx.map(f => [f.pair, f.current, f.mom, f.yoy, f.note]);
+  el.innerHTML = tblRows(['통화쌍','금주','전월비','전년비','비고'], rows)
+    + fx.filter(f=>f.source).map(f => srcLink(f.source, f.pair)).join(' ');
+}
+
+function renderIndicators(inds, notice) {
+  const el = document.getElementById('tab-inds');
+  if (!el) return;
+  const rows = inds.map(i => [i.name, i.date, i.actual, i.forecast, i.prev, i.yoy||'—', i.eval]);
+  el.innerHTML = tblRows(['지표명','발표일','실제치','예상치','전월치','전년비','평가'], rows)
+    + `<p class="notice">※ ${esc(notice)}</p>`
+    + inds.filter(i=>i.source).map(i => srcLink(i.source, i.name.split('(')[0])).join(' ');
+}
+
+function renderFed(fed) {
+  const el = document.getElementById('tab-fed');
+  if (!el) return;
+  const items = [
+    ['현행 기준금리', fed.rate, ''],
+    ['다음 FOMC',    fed.next, fed.source_fomc||''],
+    ['지배구조',     fed.gov,  ''],
+    ['시장 기대',    fed.market, fed.source_fedwatch||''],
+  ];
+  el.innerHTML = '<ul class="fed-list">'
+    + items.map(([l,v,url]) =>
+        `<li><span class="fed-label">${esc(l)}</span><span>${esc(v)} ${srcLink(url)}</span></li>`
+      ).join('')
+    + '</ul>';
+}
+
+function renderNews(news) {
+  const el = document.getElementById('news-list');
+  if (!el) return;
+  const marks = ['①','②','③','④','⑤'];
+  el.innerHTML = news.map((n, i) => `
+    <div class="news-card">
+      <div class="news-header">
+        <span>${marks[i]||i+1} ${esc(n.title)}</span>
+        <span class="news-arrow">▶</span>
+      </div>
+      <div class="news-body open">
+        <div class="news-row"><span class="badge badge-fact">[사실] 배경</span><span>${esc(n.background)}</span></div>
+        <div class="news-row"><span class="badge badge-fact">[사실] 경과</span><span>${esc(n.progress)}</span></div>
+        <div class="news-row"><span class="badge badge-fact">[사실] 시장영향</span><span>${esc(n.impact)}</span></div>
+        <div class="news-row"><span class="badge badge-opinion">[의견]</span><span>${esc(n.opinion)}</span></div>
+        ${n.source_url ? `<div class="news-src">${srcLink(n.source_url, n.source_label||'원문 보기')}</div>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function renderCalendar(nw) {
+  const el = document.getElementById('calendar-body');
+  if (!el) return;
+  el.innerHTML = nw.calendar.map(c => {
+    const imp = c.importance.includes('★★★') ? 'imp-high' : c.importance.includes('★★') ? 'imp-mid' : '';
+    const src = c.source ? srcLink(c.source) : '';
+    return `<div class="tl-row ${imp}">
+      <span class="tl-date">${esc(c.date)}</span>
+      <span class="tl-time">${esc(c.time)}</span>
+      <span class="tl-country">${esc(c.country)}</span>
+      <span class="tl-event">${esc(c.event)} ${src}</span>
+      <span class="tl-forecast">예상: ${esc(c.forecast)} / 전: ${esc(c.prev)}</span>
+      <span class="tl-imp">${esc(c.importance)}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('calendar-notice').textContent = '※ ' + nw.calendar_notice;
+  const sp = document.getElementById('speakers-list');
+  if (sp) sp.innerHTML = nw.speakers.map(s => `<li>${esc(s)}</li>`).join('');
+}
+
+function renderOutlook(o) {
+  const mkCard = (title, fact, opinion) =>
+    `<div class="outlook-card">
+      <h4>${esc(title)}</h4>
+      <div class="outlook-row"><span class="badge badge-fact">[사실]</span><span>${esc(fact)}</span></div>
+      <div class="outlook-row"><span class="badge badge-opinion">[의견]</span><span>${esc(opinion)}</span></div>
+    </div>`;
+  const grid = document.getElementById('outlook-grid');
+  if (grid) grid.innerHTML =
+    mkCard('경기·인플레이션', o.economy.fact, o.economy.opinion) +
+    mkCard('통화정책', o.monetary.fact, o.monetary.opinion) +
+    mkCard('지정학·무역', o.geopolitical.fact, o.geopolitical.opinion);
+  const cp = document.getElementById('checkpoints');
+  if (cp) cp.innerHTML = o.checkpoints.map(c => `<li>${esc(c)}</li>`).join('');
+}
+
+/* ── 초기화 ── */
+document.addEventListener('DOMContentLoaded', () => {
+  /* 날짜 선택 셀렉트 채우기 */
+  const sel = document.getElementById('report-sel');
+  if (sel) {
+    Object.keys(REPORTS).sort().reverse().forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d; opt.textContent = d;
+      if (d === activeDate) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', e => switchReport(e.target.value));
+  }
+
+  /* 히스토리컬 차트 셀렉트 */
+  const hsel = document.getElementById('hist-sel');
+  if (hsel) {
+    hsel.addEventListener('change', e => renderHistChart(e.target.value));
+    renderHistChart(hsel.value);
+  }
+
+  initTabs();
+  renderAll();
+});
+
+</script>
+</body>
+</html>

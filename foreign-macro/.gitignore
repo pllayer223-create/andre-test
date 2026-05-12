@@ -1,0 +1,16 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# 보고서 아카이브 (필요 시 git 추적 제외)
+# archive/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Word 임시 파일
+~$*
+workfile
