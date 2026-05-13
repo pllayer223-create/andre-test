@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Windows 작업 스케줄러 등록 방법:
+  1. 관리자 권한으로 PowerShell 실행
+  2. 다음 명령 실행:
+     Register-ScheduledTask -Xml (Get-Content "C:\Users\82104\projects\foreign-macro\foreign-macro\auto_scheduler.xml" -Raw) -TaskName "MarketDailyReport" -Force
+  3. 또는 작업 스케줄러(taskschd.msc) GUI에서 "작업 가져오기"로 이 파일 등록
+
+  실행 조건: 평일(월~금) 오전 9:00 자동 실행
+-->
+<Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
+  <RegistrationInfo>
+    <Description>Market Daily 보고서 자동 생성 - 매일 오전 9시 실행</Description>
+    <Author>MarketDaily</Author>
+  </RegistrationInfo>
+  <Triggers>
+    <CalendarTrigger>
+      <StartBoundary>2026-05-14T09:00:00</StartBoundary>
+      <Enabled>true</Enabled>
+      <ScheduleByWeek>
+        <WeeksInterval>1</WeeksInterval>
+        <DaysOfWeek>
+          <Monday />
+          <Tuesday />
+          <Wednesday />
+          <Thursday />
+          <Friday />
+        </DaysOfWeek>
+      </ScheduleByWeek>
+    </CalendarTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id="Author">
+      <LogonType>InteractiveToken</LogonType>
+      <RunLevel>LeastPrivilege</RunLevel>
+    </Principal>
+  </Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>true</AllowHardTerminate>
+    <StartWhenAvailable>true</StartWhenAvailable>
+    <ExecutionTimeLimit>PT1H</ExecutionTimeLimit>
+    <Enabled>true</Enabled>
+  </Settings>
+  <Actions Context="Author">
+    <Exec>
+      <Command>python</Command>
+      <Arguments>C:\Users\82104\projects\foreign-macro\foreign-macro\pipeline.py</Arguments>
+      <WorkingDirectory>C:\Users\82104\projects\foreign-macro\foreign-macro</WorkingDirectory>
+    </Exec>
+  </Actions>
+</Task>
