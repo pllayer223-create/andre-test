@@ -1,14 +1,38 @@
-"""새 sample.html 빌드 스크립트 - 기존 데이터 보존 + UI 전면 개선"""
-import pathlib
+"""새 sample.html 빌드 스크립트 - JSON 파일에서 직접 데이터 로드"""
+import json, pathlib
 
-BASE = pathlib.Path(__file__).parent
+BASE     = pathlib.Path(__file__).parent
+PROJ     = BASE.parent.parent  # foreign-macro/foreign-macro
+DAILY    = PROJ / "data" / "daily"
+HIST_P   = PROJ / "data" / "historical_daily.json"
 
-with open(BASE / 'sample.html', encoding='utf-8') as f:
-    orig = f.read()
+FILES = ["summary","indicators","schedule","domestic_rates","domestic_markets",
+         "investor_flow","overseas_rates","overseas_markets","commodities",
+         "commentary","credit_spread"]
 
-s = orig.find('const ALL_DATA = ')
-e = orig.find('let activeDate = ')
-DATA_BLOCK = orig[s:e].strip()
+# 1. 날짜별 데이터 로드 (JSON 파일 직접)
+all_data = {}
+for date_dir in sorted(DAILY.iterdir()):
+    dt = date_dir.name
+    if not dt.isdigit(): continue
+    d = {"report_date": dt}
+    for f in FILES:
+        p = date_dir / f"{f}.json"
+        if p.exists():
+            d[f] = json.loads(p.read_text(encoding="utf-8"))
+    if len(d) > 1:
+        all_data[dt] = d
+
+# 2. 역사적 시계열 로드
+hist = json.loads(HIST_P.read_text(encoding="utf-8")) if HIST_P.exists() else {}
+
+# 3. JS 데이터 블록 생성
+all_js  = json.dumps(all_data, ensure_ascii=False)
+hist_js = json.dumps(hist,     ensure_ascii=False)
+DATA_BLOCK = f"const ALL_DATA = {all_js};\n\nconst HIST = {hist_js};\n\nconst SORTED_DATES = Object.keys(ALL_DATA).sort();"
+
+print(f"  날짜: {list(all_data.keys())}")
+print(f"  데이터 블록 길이: {len(DATA_BLOCK):,} chars")
 
 HEAD = """<!DOCTYPE html>
 <html lang="ko">
@@ -80,10 +104,10 @@ nav select option{background:#003087}
 .summary-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .summary-hdr-icon{font-size:16px}
 .summary-hdr-txt{font-size:11px;font-weight:700;color:#ffd700;letter-spacing:.5px}
-.summary-bullets{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-@media(max-width:600px){.summary-bullets{grid-template-columns:1fr}}
+.summary-bullets{display:flex;flex-direction:column;gap:6px}
 .summary-bullet{background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;
-                font-size:11px;line-height:1.65;border-left:3px solid rgba(255,215,0,.7)}
+                font-size:11px;line-height:1.7;border-left:3px solid rgba(255,215,0,.7);
+                word-break:keep-all;white-space:normal}
 .summary-bullet-tag{font-size:9px;font-weight:700;color:#ffd700;margin-bottom:2px;letter-spacing:.4px}
 .summary-single{font-size:12px;line-height:1.7;padding:4px 0}
 
@@ -286,7 +310,7 @@ BODY = """
   <span class="nav-date-count" id="date-count"></span>
   <div class="nav-actions">
     <button class="btn-nav-sm" onclick="openValidation()">✓ 검증</button>
-    <button class="btn-nav-sm" onclick="window.print()">햤 인쇄</button>
+    <button class="btn-nav-sm" onclick="window.print()">인쇄</button>
   </div>
 </nav>
 
@@ -453,10 +477,18 @@ BODY = """
   <div class="ai-msgs" id="ai-msgs">
     <div class="ai-msg assistant">안녕하세요! Market Daily 데이터 기반 AI 애널리스트입니다.
 
-API Key를 입력하면 다음과 같이 질문하세요:
+━━ API Key 설정 방법 ━━
+① console.anthropic.com 접속 (로그인 필요)
+② 좌측 메뉴 → API Keys → Create Key
+③ sk-ant-... 형식의 키 복사
+④ 위 입력란에 붙여넣기 → 저장 클릭
+⑤ 저장 후 아래 입력창에서 바로 질문 가능
+
+━━ 질문 예시 ━━
 • "오늘 국내금리 동향을 요약해줘"
 • "KOSPI 하락 원인은?"
-• "WTI 가격 변동 원인을 설명해줘"</div>
+• "WTI 가격 변동 원인을 설명해줘"
+• "미국 CPI 발표가 채권시장에 미치는 영향은?"</div>
   </div>
   <div class="ai-ctx"><span>📊</span><span id="ai-ctx-txt">준비 중...</span></div>
   <div class="ai-input-row">
@@ -815,19 +847,21 @@ function openChart(name,cat,_ev){
     '<span>\\ucd5c\\uc800: <strong>'+minV?.toFixed(3)+' '+unit+'</strong></span>'+
     '<span>\\ub370\\uc774\\ud130: <strong>'+labels.length+'\\uac1c \\ud3ec\\uc778\\ud2b8</strong></span>';
 
-  popupChart=new Chart(ctx2,{
-    type:'line',
-    data:{labels,datasets:[{label:name,data:vals,borderColor:'#1a56c4',
-      backgroundColor:'rgba(26,86,196,.08)',fill:true,borderWidth:2,pointRadius:2,pointHoverRadius:6,tension:0.2}]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+name+': '+c.parsed.y?.toFixed(3)+' '+unit}}},
-      scales:{
-        x:{ticks:{font:{size:9},maxTicksLimit:12},grid:{color:'#f0f0f0'}},
-        y:{ticks:{font:{size:10},callback:v=>v.toFixed(2)+' '+unit},grid:{color:'#f0f0f0'}}
+  requestAnimationFrame(()=>{
+    popupChart=new Chart(ctx2,{
+      type:'line',
+      data:{labels,datasets:[{label:name,data:vals,borderColor:'#1a56c4',
+        backgroundColor:'rgba(26,86,196,.08)',fill:true,borderWidth:2,pointRadius:2,pointHoverRadius:6,tension:0.2}]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+name+': '+c.parsed.y?.toFixed(3)+' '+unit}}},
+        scales:{
+          x:{ticks:{font:{size:9},maxTicksLimit:12},grid:{color:'#f0f0f0'}},
+          y:{ticks:{font:{size:10},callback:v=>v.toFixed(2)+' '+unit},grid:{color:'#f0f0f0'}}
+        }
       }
-    }
+    });
   });
 }
 
@@ -1000,7 +1034,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 </body>
 </html>"""
 
-html = HEAD + BODY + JS + DATA_BLOCK + "\nlet activeDate = SORTED_DATES[SORTED_DATES.length-1];\n" + JS_TAIL
+html = HEAD + BODY + JS + DATA_BLOCK + "\n" + JS_TAIL
 
 with open(BASE / 'sample.html', 'w', encoding='utf-8') as f:
     f.write(html)
