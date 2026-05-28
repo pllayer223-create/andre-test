@@ -101,15 +101,12 @@ nav select option{background:#003087}
 .summary-card{margin:10px 14px;background:linear-gradient(135deg,#1e3a8a 0%,#1a56c4 100%);
               border-radius:10px;padding:12px 18px;color:#fff;border-left:5px solid #ffd700;display:none}
 .summary-card.show{display:block}
-.summary-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.summary-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .summary-hdr-icon{font-size:16px}
-.summary-hdr-txt{font-size:11px;font-weight:700;color:#ffd700;letter-spacing:.5px}
-.summary-bullets{display:flex;flex-direction:column;gap:6px}
-.summary-bullet{background:rgba(255,255,255,.1);border-radius:6px;padding:7px 10px;
-                font-size:11px;line-height:1.7;border-left:3px solid rgba(255,215,0,.7);
-                word-break:keep-all;white-space:normal}
-.summary-bullet-tag{font-size:9px;font-weight:700;color:#ffd700;margin-bottom:2px;letter-spacing:.4px}
-.summary-single{font-size:12px;line-height:1.7;padding:4px 0}
+.summary-hdr-txt{font-size:12px;font-weight:700;color:#ffd700;letter-spacing:.8px;text-transform:uppercase}
+.summary-insight{font-size:13px;line-height:1.85;color:#f0f4ff;word-break:keep-all;white-space:normal;letter-spacing:.1px}
+.summary-divider{border:none;border-top:1px solid rgba(255,255,255,.2);margin:10px 0 8px}
+.summary-source{font-size:10px;color:rgba(255,215,0,.75);letter-spacing:.3px}
 
 /* KPI */
 .kpi-row{display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px}
@@ -244,7 +241,7 @@ tbody td:first-child{text-align:left;font-weight:500;color:#1e3a6e}
 .cm-box-head button{background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:5px;
                     padding:3px 10px;cursor:pointer;font-family:inherit}
 .cm-box-body{padding:14px}
-.cm-modal-canvas{height:280px}
+.cm-modal-canvas{width:100%!important;height:280px!important;max-height:280px}
 .cm-meta{display:flex;gap:16px;padding:10px 0 4px;font-size:10px;color:var(--gray);flex-wrap:wrap}
 .cm-meta strong{color:#111;font-size:12px}
 
@@ -318,7 +315,6 @@ BODY = """
   <div class="query-mode" id="qmode">
     <button class="active" onclick="setMode('data',this)">데이터검색</button>
     <button onclick="setMode('web',this)">웹검색</button>
-    <button onclick="setMode('claude',this)">🤖 Claude</button>
   </div>
   <input id="q-input" class="query-input" type="text"
          placeholder="검색어 입력 (예: 국고칄 3Y, 미국 CPI, 비트코인 ...)" />
@@ -353,7 +349,7 @@ BODY = """
 <div id="summary-card" class="summary-card">
   <div class="summary-hdr">
     <span class="summary-hdr-icon">💡</span>
-    <span class="summary-hdr-txt">핵심 요약</span>
+    <span class="summary-hdr-txt">Today's Insight</span>
   </div>
   <div id="summary-content"></div>
 </div>
@@ -546,12 +542,11 @@ function runQuery(){
   const q=(document.getElementById('q-input')?.value||'').trim();
   if(!q)return;
   if(qMode==='web'){doWebSearch(q);return;}
-  if(qMode==='claude'){document.getElementById('ai-ta').value=q;if(!document.getElementById('ai-panel').classList.contains('open'))toggleAI();sendAI();return;}
   doDataSearch(q);
 }
 
 function doWebSearch(q){
-  const enc=encodeURIComponent(q+' \\uae08\\uc735\\uc2dc\\uc7a5');
+  const enc=encodeURIComponent(q);
   document.getElementById('qr-title-txt').textContent='\\uc6f9 \\uac80\\uc0c9: "'+esc(q)+'"';
   document.getElementById('qr-body').innerHTML=
     '<div style="display:flex;gap:10px;padding:6px 0">'+
@@ -624,23 +619,17 @@ function renderHeader(d){
   document.getElementById('rh-data-date').textContent=dd.replace(/(\\d{4})-(\\d{2})-(\\d{2})/,'$1.$2.$3')+(dd?' '+wd[dd2.getDay()]:'');
 }
 
-/* ======== SUMMARY (improved) ======== */
+/* ======== SUMMARY ======== */
 function renderSummary(s){
   const card=document.getElementById('summary-card');
   const cont=document.getElementById('summary-content');
   if(!s?.text){card.classList.remove('show');return;}
   card.classList.add('show');
-  const raw=s.text;
-  const parts=raw.split(/[,\\uff0c]/).map(x=>x.trim()).filter(Boolean);
-  if(parts.length>1){
-    const tagMap={'\\uae08\\ub9ac':'RATE','\\uc8fc\\uc2dd':'EQUITY','\\ud658\\uc728':'FX','\\uc6d0\\uc790\\uc7ac':'COMMODITY','\\uae00\\ub85c\\ubc8c':'GLOBAL','\\uad6d\\ub0b4':'DOMESTIC','\\uc2dc\\uc7a5':'MARKET'};
-    cont.innerHTML='<div class="summary-bullets">'+parts.slice(0,4).map(p=>{
-      const tag=Object.keys(tagMap).find(t=>p.includes(t))||'\\uc2dc\\uc7a5';
-      return '<div class="summary-bullet"><div class="summary-bullet-tag">'+tagMap[tag]+'</div>'+esc(p)+'</div>';
-    }).join('')+'</div>';
-  } else {
-    cont.innerHTML='<div class="summary-single">'+esc(raw)+'</div>';
-  }
+  const src=s.source||'KRX \\xb7 FRED \\xb7 yfinance';
+  cont.innerHTML=
+    '<div class="summary-insight">'+esc(s.text)+'</div>'+
+    '<hr class="summary-divider">'+
+    '<div class="summary-source">&#128196; \\ucd9c\\ucc98: '+esc(src)+'</div>';
 }
 
 /* ======== KPI ======== */
@@ -677,21 +666,21 @@ function renderDomRates(dr){
   const el=document.getElementById('dom-rates-body');
   if(!el||!dr?.items)return;
   const dd=(dr.data_date||'').replace(/\\d{4}-(\\d{2}-\\d{2})/,'$1');
-  el.innerHTML=mkTbl(['\\uad6d\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],
+  el.innerHTML=mkTbl(['\\uad6c\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],
     dr.items.map(x=>({name:x.name,cat:'\\uad6d\\ub0b4\\uae08\\ub9ac',cells:[x.name,x.value?.toFixed(3)||'\\u2014',x.prev_day_str||'\\u2014',x.ytd_str||'\\u2014']})),'openChart');
 }
 function renderDomMkt(dm){
   const el=document.getElementById('dom-mkt-body');
   if(!el||!dm?.items)return;
   const dd=(dm.data_date||'').replace(/\\d{4}-(\\d{2}-\\d{2})/,'$1');
-  el.innerHTML=mkTbl(['\\uad6d\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],
+  el.innerHTML=mkTbl(['\\uad6c\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],
     dm.items.map(x=>({name:x.name,cat:'\\uad6d\\ub0b4\\uc8fc\\uc2dd\\ud658\\uc728',cells:[x.name,x.value?.toLocaleString()||'\\u2014',x.prev_day_str||'\\u2014',x.ytd_str||'\\u2014']})),'openChart');
 }
 function renderOsRates(or_){
   const el=document.getElementById('os-rates-body');
   if(!el||!or_?.items)return;
   const dd=(or_.data_date||'').replace(/\\d{4}-(\\d{2}-\\d{2})/,'$1');
-  el.innerHTML=mkTbl(['\\uad6d\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],
+  el.innerHTML=mkTbl(['\\uad6c\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],
     or_.items.map(x=>({name:x.name,cat:'\\ud574\\uc678\\uae08\\ub9ac',cells:[x.name,x.value?.toFixed(3)||'\\u2014',x.prev_day_str||'\\u2014',x.ytd_str||'\\u2014']})),'openChart');
 }
 function renderOsMkt(om){
@@ -703,13 +692,13 @@ function renderOsMkt(om){
     ...(om.crypto||[]).map(x=>({name:x.name,cat:'\\uc554\\ud638\\ud654\\ud3d0',cells:[x.name,x.value?.toLocaleString()||'\\u2014',x.prev_day_str||'\\u2014',x.ytd_str||'\\u2014']})),
   ];
   const dd=(om.data_date||'').replace(/\\d{4}-(\\d{2}-\\d{2})/,'$1');
-  el.innerHTML=mkTbl(['\\uad6d\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],rows,'openChart');
+  el.innerHTML=mkTbl(['\\uad6c\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],rows,'openChart');
 }
 function renderComm(cm){
   const el=document.getElementById('comm-body');
   if(!el||!cm?.items)return;
   const dd=(cm.data_date||'').replace(/\\d{4}-(\\d{2}-\\d{2})/,'$1');
-  el.innerHTML=mkTbl(['\\uad6d\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],
+  el.innerHTML=mkTbl(['\\uad6c\\ubd84',dd,'\\uc804\\uc77c\\ub300\\ube44','\\uc804\\ub144\\ub9d0\\ub300\\ube44'],
     cm.items.map(x=>({name:x.name,cat:'\\uc0c1\\ud488',cells:[x.name,x.value?.toLocaleString()||'\\u2014',x.prev_day_str||'\\u2014',x.ytd_str||'\\u2014']})),'openChart');
 }
 
@@ -834,7 +823,11 @@ function openChart(name,cat,_ev){
   document.getElementById('cm-title').textContent=name+' ('+cat+')';
   document.getElementById('chart-modal').classList.add('open');
   if(popupChart){popupChart.destroy();popupChart=null;}
-  const ctx2=document.getElementById('cm-canvas');
+  const oldCanvas=document.getElementById('cm-canvas');
+  const newCanvas=document.createElement('canvas');
+  newCanvas.id='cm-canvas';newCanvas.className='cm-modal-canvas';
+  oldCanvas.parentNode.replaceChild(newCanvas,oldCanvas);
+  const ctx2=newCanvas;
 
   if(!labels.length){document.getElementById('cm-meta').innerHTML='<span>\\uc2dc\\uacc4\\uc5f4 \\ub370\\uc774\\ud130 \\uc5c6\\uc74c</span>';return;}
 
