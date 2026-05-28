@@ -27,7 +27,10 @@ import type { EconomicIndicator, DataPoint } from "@/lib/types";
 // ── 환경 변수 ──────────────────────────────
 const FRED_API_KEY = process.env.FRED_API_KEY ?? "";
 const BOK_API_KEY = process.env.BOK_API_KEY ?? "";
-const CACHE_DIR = path.join(process.cwd(), "data", "market");
+// Vercel은 프로젝트 루트가 read-only → /tmp 사용. 로컬은 data/market 사용.
+const CACHE_DIR = process.env.VERCEL
+  ? "/tmp/market"
+  : path.join(process.cwd(), "data", "market");
 
 // ── 캐시 헬퍼 ──────────────────────────────
 

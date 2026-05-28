@@ -223,6 +223,8 @@ export default function SettingsSection({ indicators, date }: SettingsSectionPro
   function handleSave() {
     saveSettings(s);
     applySettings(s);
+    // page.tsx의 자동 갱신 interval을 즉시 재설정하도록 이벤트 발송
+    window.dispatchEvent(new Event("macro_settings_updated"));
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
