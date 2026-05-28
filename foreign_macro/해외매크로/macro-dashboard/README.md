@@ -151,3 +151,4 @@ function localToday(): string {
 ## 라이선스
 
 Private — 개인/업무 내부 사용 목적
+# foreign-macro
