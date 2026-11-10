@@ -96,6 +96,19 @@ textarea:disabled{opacity:.55}
 #chat .cr button{background:#2d7a4f;color:#fff;border:0;border-radius:10px;min-height:36px;padding:2px 12px;font-size:12px;font-weight:600}
 #chat .cr .cx{background:#eef2ee;color:#333}
 #mapinfo .ret{background:#fff;color:#2d7a4f;border:1px solid #2d7a4f}
+#entry{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:16px;background:linear-gradient(160deg,rgba(14,40,30,.88),rgba(20,30,60,.9));color:#fff;text-align:center;overflow:auto}
+#entry[hidden]{display:none}
+#entry .ec{width:min(380px,100%);background:rgba(255,255,255,.97);color:#14201a;border-radius:18px;padding:22px 18px;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+#entry h2{margin:0 0 2px;font-size:21px}
+#entry .es{font-size:12px;color:#5b665f;margin:0 0 16px}
+#entry .el{font-size:13px;font-weight:700;text-align:left;margin:12px 0 6px}
+#entry input{width:100%;font:inherit;font-size:16px;color:#14201a;background:#fff;border:1.5px solid #c9d3cc;border-radius:10px;padding:10px 12px}
+#entry .et{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#entry .et button{border:2px solid;background:#fff;color:#14201a;border-radius:12px;min-height:44px;font-size:14px;font-weight:700}
+#entry .et button.on{color:#fff}
+#entry .eg{margin-top:18px;width:100%;min-height:50px;border:0;border-radius:14px;background:#2d7a4f;color:#fff;font-size:17px;font-weight:800}
+#entry .eg:disabled{background:#b8c4bc}
+#entry .en{font-size:11px;color:#6a746d;margin-top:10px}
 #diagbtn{position:absolute;right:10px;top:86px;z-index:3;background:rgba(255,255,255,.8);color:#555;border:0;border-radius:999px;min-height:26px;padding:2px 10px;font-size:11px}
 #diag{position:absolute;left:10px;right:10px;bottom:70px;z-index:9;max-height:55%;overflow:auto;background:#fff;color:#14201a;border-radius:12px;padding:10px 12px;font-size:11px;line-height:1.5;box-shadow:0 6px 24px rgba(0,0,0,.35);white-space:pre-wrap;word-break:break-all}
 #diag[hidden]{display:none}
@@ -133,6 +146,16 @@ textarea:disabled{opacity:.55}
     <div class="hud hud-pl"><span id="h-place"></span><button id="h-change">장소 변경</button><button id="h-map">목적지로 이동</button></div>
     <div class="cap">WASD/방향키 이동 · Space 점프 · Q/E 시점 · 전시품 클릭 또는 F키로 설명 · M키 약도 · G 유물 줍기/내려놓기 · Enter 말풍선 채팅 · 노란 별 모으기(레벨업) · 파란/주황 패드로 층 이동 · 전시품은 임의 구성</div>
     <button id="saybtn">말하기</button>
+    <div id="entry"><div class="ec">
+      <h2>자금운용본부 워크샵</h2>
+      <p class="es">국립중앙박물관 · 용산어린이정원 관람 코스</p>
+      <div class="el">내 이름 (12자 이내)</div>
+      <input id="entry-name" maxlength="12" autocomplete="off" placeholder="이름 또는 별명">
+      <div class="el">소속 팀</div>
+      <div class="et" id="entry-teams"></div>
+      <button class="eg" id="entry-go" disabled>참석하기</button>
+      <div class="en">이름과 팀을 정한 뒤 참석하기를 누르면 입장합니다. 이름과 위치는 같은 시간에 접속한 참석자에게 보입니다. 실명·업무 정보는 쓰지 마세요.</div>
+    </div></div>
     <button id="teambtn">팀 선택</button>
     <button id="diagbtn">접속진단</button>
     <div id="diag" hidden></div>
@@ -422,7 +445,7 @@ function extConnect(){
     if (pl.length > 2000) return;
     ws.send(pkt(0x30, [...str(topic), ...pl]));
   };
-  const txPresence = () => { lastTx = Date.now(); send(tP, mine); };
+  const txPresence = () => { if (!window.__ENTERED || !Object.keys(mine).length) return; lastTx = Date.now(); send(tP, mine); };
   const onPub = (topic, pl) => {
     if (topic.indexOf(base) !== 0) return;
     const rest = topic.slice(base.length).split('/'), kind = rest[0], from = rest[1];
@@ -461,7 +484,7 @@ function extConnect(){
     on: (t, h) => { (eH[t] = eH[t] || []).push(h); return () => {}; },
     onConnection: h => { cH.push(h); setTimeout(() => { try { h(conn); } catch (e) {} }, 0); return () => {}; },
     connected: () => conn,
-    presence: p => { for (const k in p){ if (p[k] === null) delete mine[k]; else if (k !== 'c' || EXT_CHAT) mine[k] = p[k]; } if (Date.now() - lastTx > 200) txPresence(); rebuild(); return Promise.resolve(); },
+    presence: p => { if (!window.__ENTERED) return Promise.resolve(); for (const k in p){ if (p[k] === null) delete mine[k]; else if (k !== 'c' || EXT_CHAT) mine[k] = p[k]; } if (Date.now() - lastTx > 200) txPresence(); rebuild(); return Promise.resolve(); },
     emit: (t, d) => { send(tE, {t, d}); return Promise.resolve(); },
     transport: 'ext', broker: () => broker,
   };
@@ -506,7 +529,7 @@ function extConnect(){
     } catch (e) {
       R = null;
     }
-    if (R) window.__TRANSPORT = 'room';
+    if (R){ window.__TRANSPORT = 'room'; const RR = R; R = {peers: () => RR.peers(), onPeers: h => RR.onPeers(h), on: (t, h) => RR.on(t, h), emit: (t, d) => RR.emit(t, d), onConnection: h => RR.onConnection(h), connected: () => RR.connected(), presence: p => window.__ENTERED ? RR.presence(p) : Promise.resolve()}; }
   }
   if (!R){
     $('rstat').textContent = '혼자 보기';
@@ -1227,12 +1250,12 @@ function extConnect(){
   let tour = false;
   let TEAM = -1; try { const tv = parseInt(localStorage.getItem('ncm-team'), 10); if (tv >= 0 && tv < 5) TEAM = tv; } catch (e) {}
   function pub(force){
-    if (!R) return;
+    if (!R || !window.__ENTERED) return;
     const now = Date.now();
     const ch = Math.hypot(P.x - lastSent.x, P.z - lastSent.z) > 0.4 || P.f !== lastSent.f || cur !== lastSent.s || isGuide !== lastSent.g || got.size !== lastSent.k || TEAM !== lastSent.tm;
     if (!force && (!ch || now - lastPub < 250)) return;
     lastPub = now; lastSent = {x: P.x, z: P.z, f: P.f, s: cur, g: isGuide, k: got.size, tm: TEAM};
-    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, v: 21}).catch(() => {});
+    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, v: 22}).catch(() => {});
   }
   const num = v => (typeof v === 'number' && isFinite(v)) ? v : null;
   let lastRoom = '', lastInside = null;
@@ -1619,7 +1642,7 @@ function extConnect(){
   }
   $h('nick-save').onclick = saveNick; nin.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); saveNick(); } });
   function diagText(){
-    const L = ['버전 v21 · 연결 방식: ' + (window.__TRANSPORT || '-') + (R && R.broker ? ' (' + R.broker() + ')' : '') + ' · 실시간 객체: ' + (R ? '있음' : '없음(혼자 보기)')];
+    const L = ['버전 v22 · 연결 방식: ' + (window.__TRANSPORT || '-') + (R && R.broker ? ' (' + R.broker() + ')' : '') + ' · 실시간 객체: ' + (R ? '있음' : '없음(혼자 보기)')];
     if (R){
       let c = null; try { c = R.connected(); } catch (e) {}
       L.push('연결 상태: ' + c);
@@ -1634,7 +1657,25 @@ function extConnect(){
   setInterval(() => { const d = $h('diag'); if (!d.hidden) d.textContent = diagText(); }, 1000);
   $h('teambtn').onclick = () => openInfo($h('teamsel').hidden);
   $h('team-x').onclick = () => { $h('teamsel').hidden = true; };
-  applyTeam(); if (TEAM < 0) setTimeout(() => openInfo(true), 900);
+  applyTeam();
+  /* ---- 참석하기(입장) 화면: 이름·팀을 정한 뒤 입장해야 다른 참석자에게 내가 보임 ---- */
+  window.addEventListener('keydown', e => { if (!window.__ENTERED && !(e.target && e.target.tagName === 'INPUT')) e.stopImmediatePropagation(); }, true);
+  const eIn = $h('entry-name'), eGo = $h('entry-go'), eBtns = [];
+  let eTeam = TEAM;
+  const eMark = () => { eBtns.forEach((b, i) => { b.classList.toggle('on', i === eTeam); b.style.background = i === eTeam ? TEAMC[i] : '#fff'; }); eGo.disabled = !(eIn.value.trim() && eTeam >= 0); };
+  TEAMN.forEach((n, i) => { const b = document.createElement('button'); b.textContent = n; b.style.borderColor = TEAMC[i]; b.onclick = () => { eTeam = i; eMark(); }; $h('entry-teams').appendChild(b); eBtns.push(b); });
+  eIn.value = NICK; eIn.oninput = eMark; eMark();
+  function enterWorld(){
+    const v = eIn.value.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 12);
+    if (!v || eTeam < 0) return;
+    NICK = v; try { localStorage.setItem('ncm-nick', NICK); } catch (e) {}
+    TEAM = eTeam; try { localStorage.setItem('ncm-team', String(TEAM)); } catch (e) {}
+    window.__ENTERED = true; $h('entry').hidden = true;
+    applyTeam(); sync(); pub(true); renderPeers();
+    toast(TEAMN[TEAM] + ' · ' + NICK + ' 님, 환영합니다');
+  }
+  eGo.onclick = enterWorld; eIn.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); enterWorld(); } });
+  window.S3.enter = (n, t) => { eIn.value = n; eTeam = t; eMark(); enterWorld(); };
 
   /* ---- 유물 줍기 / 내려놓기 (이 화면에서만 적용) ---- */
   const hold = new THREE.Group(); hold.position.set(0.5, 0.95, 0.45); hold.scale.setScalar(0.45); me.g.add(hold);
