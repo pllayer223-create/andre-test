@@ -109,7 +109,7 @@ textarea:disabled{opacity:.55}
 #entry .eg{margin-top:18px;width:100%;min-height:50px;border:0;border-radius:14px;background:#2d7a4f;color:#fff;font-size:17px;font-weight:800}
 #entry .eg:disabled{background:#b8c4bc}
 #entry .en{font-size:11px;color:#6a746d;margin-top:10px}
-#diagbtn{position:absolute;right:10px;top:86px;z-index:3;background:rgba(255,255,255,.8);color:#555;border:0;border-radius:999px;min-height:26px;padding:2px 10px;font-size:11px}
+#diagbtn{display:none;position:absolute;right:10px;top:86px;z-index:3;background:rgba(255,255,255,.8);color:#555;border:0;border-radius:999px;min-height:26px;padding:2px 10px;font-size:11px}
 #diag{position:absolute;left:10px;right:10px;bottom:70px;z-index:9;max-height:55%;overflow:auto;background:#fff;color:#14201a;border-radius:12px;padding:10px 12px;font-size:11px;line-height:1.5;box-shadow:0 6px 24px rgba(0,0,0,.35);white-space:pre-wrap;word-break:break-all}
 #diag[hidden]{display:none}
 #teambtn{position:absolute;right:10px;top:50px;z-index:3;background:rgba(255,255,255,.93);color:#2d7a4f;border:0;border-radius:999px;min-height:32px;padding:2px 10px;font-size:12px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.15)}
@@ -153,6 +153,8 @@ textarea:disabled{opacity:.55}
       <input id="entry-name" maxlength="12" autocomplete="off" placeholder="이름 또는 별명">
       <div class="el">소속 팀</div>
       <div class="et" id="entry-teams"></div>
+      <div class="el">출발 장소</div>
+      <div class="et" id="entry-start"></div>
       <button class="eg" id="entry-go" disabled>참석하기</button>
       <div class="en">이름과 팀을 정한 뒤 참석하기를 누르면 입장합니다. 이름과 위치는 같은 시간에 접속한 참석자에게 보입니다. 실명·업무 정보는 쓰지 마세요.</div>
     </div></div>
@@ -980,6 +982,16 @@ function extConnect(){
     const t2 = tag('4호선 · 경의중앙선', 4.4, '#1b2a4a', 'rgba(255,255,255,.95)', '#2a4a8a'); t2.position.set(-37, 5.4, 38); OUT.add(t2);
     const t3 = tag('박물관 서문 방향 →', 4.4, '#fff', 'rgba(45,58,51,.9)', null); t3.position.set(-28, 3.2, 38); OUT.add(t3);
   })();
+  // 판교역 (신분당선·경강선) · 열린마당 동쪽 끝 (개념 배치, 박물관 방향 안내)
+  flat(14, 16, 0xb9ad92, 29, 38, 0.012);
+  (function(){
+    const g = new THREE.Group();
+    g.add(box(6, 4.6, 6, 0xc9c3c3, 0, 2.3, 0), box(6.5, 0.4, 6.5, 0xc4003a, 0, 4.8, 0), box(0.1, 3, 2.2, 0x1f2430, -3.05, 1.5, 0), box(3, 0.15, 3, 0x6a7078, -4.4, 0.08, 0));
+    g.position.set(30, 0, 38); OUT.add(g); ob(27, 35, 33, 41);
+    const t1 = tag('판교역', 4.4, '#fff', 'rgba(196,0,58,.95)', null); t1.position.set(30, 6.4, 38); OUT.add(t1);
+    const t2 = tag('신분당선 · 경강선', 4.4, '#5a0020', 'rgba(255,255,255,.95)', '#c4003a'); t2.position.set(30, 5.4, 38); OUT.add(t2);
+    const t3 = tag('← 박물관 방향', 4.4, '#fff', 'rgba(45,58,51,.9)', null); t3.position.set(22, 3.2, 38); OUT.add(t3);
+  })();
   // 열린마당 소품: 가로수, 벤치, 깃발, 산울타리, 먼 산
   [[-32, 20], [30, 19], [-30, 14]].forEach(a => { OUT.add(cyl(0.25, 0.3, 2.4, 0x6a4a2a, a[0], 1.2, a[1]), ball(1.7, 0x4f9a4a, a[0], 3.6, a[1]), ball(1.2, 0x62ad58, a[0] + 0.5, 4.6, a[1] + 0.2)); CIRC.push([a[0], a[1], 0.5, 0]); });
   [[-8, 38.5, 3.14], [8, 38.5, 3.14], [-8, 21.5, 0], [8, 21.5, 0], [-17, 30, 1.57], [17, 30, -1.57]].forEach(a => {
@@ -1257,7 +1269,7 @@ function extConnect(){
     const ch = Math.hypot(P.x - lastSent.x, P.z - lastSent.z) > 0.4 || P.f !== lastSent.f || cur !== lastSent.s || isGuide !== lastSent.g || got.size !== lastSent.k || TEAM !== lastSent.tm;
     if (!force && (!ch || now - lastPub < 250)) return;
     lastPub = now; lastSent = {x: P.x, z: P.z, f: P.f, s: cur, g: isGuide, k: got.size, tm: TEAM};
-    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, v: 23}).catch(() => {});
+    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, v: 24}).catch(() => {});
   }
   const num = v => (typeof v === 'number' && isFinite(v)) ? v : null;
   let lastRoom = '', lastInside = null;
@@ -1284,7 +1296,7 @@ function extConnect(){
     });
     Object.keys(peerA).forEach(k => { if (!seen.has(k)){ removeAvatar(peerA[k]); delete peerA[k]; } });
     const rm = roomAt(P.f, P.x, P.z);
-    const where = rm ? ((P.f + 1) + '층 · ' + rm.name) : (P.x > 33 ? '야외 · 용산어린이정원' : (P.x < -29 && P.z > 30 ? '야외 · 이촌역 2번 출구 앞' : '야외 · 열린마당'));
+    const where = rm ? ((P.f + 1) + '층 · ' + rm.name) : (P.x > 33 ? '야외 · 용산어린이정원' : (P.x < -29 && P.z > 30 ? '야외 · 이촌역 2번 출구 앞' : (P.x > 20 && P.z > 32 ? '야외 · 판교역 앞' : '야외 · 열린마당')));
     const here = 1 + Object.keys(peerA).filter(k => peerA[k].f === P.f).length;
     $h('h-count').textContent = (R ? Math.max(ps.length, 1) + '명 접속' : '혼자 보기(실시간 연결 안 됨)') + ' · 같은 층 ' + here + '명 · Lv.' + lvOf(got.size) + ' ' + title() + ' · ★ ' + got.size + '/' + STAR_N + ' · ' + NICK;
     $h('h-place').textContent = where;
@@ -1439,6 +1451,10 @@ function extConnect(){
       '자금운용본부 워크샵에 오신 것을 환영합니다. 오늘은 박물관을 함께 걷는 코스예요. 이촌역은 4호선과 경의중앙선이 지나며, 2번 출구에서 박물관 서문 방향으로 이동하는 것으로 안내됩니다(서울시 뉴스룸 2018.8.29 기준).',
       '매일 시장 화면을 보던 시간에서 잠시 벗어나, 오래된 것들을 천천히 보며 동료들과 이야기를 나누는 자리입니다. 노란 화살표를 따라 로비로 가 보세요.',
       '조작: PC는 WASD/방향키와 Space(점프), 모바일은 왼쪽 아래 조이스틱과 점프 버튼입니다. 전시품이나 안내원을 누르면 설명이 나오고, 약도 버튼(PC는 M키)으로 지도를 볼 수 있어요.']},
+    {name: '판교역 안내원', x: 24, z: 36, f: 0, ry: -1.57, c: 0xc4003a, pages: [
+      '판교역에서 출발하는 분들도 환영합니다. 이 앱의 판교역은 신분당선·경강선 역을 모티브로 한 가상의 출발 지점이며, 실제 이동 경로와는 무관합니다.',
+      '왼쪽(서쪽)으로 열린마당을 가로질러 박물관 정문으로 걸어가 보세요. 이촌역에서 출발한 동료들과 마당에서 만나게 됩니다.',
+      '팀 미션: 마당에서 같은 팀 동료를 찾아 인사하고, 서로 오늘 가장 기대되는 전시를 한 가지씩 이야기해 보세요.']},
     {name: '로비 안내원', x: 5, z: 11, f: 0, ry: -1.57, c: 0x2d7a4f, pages: [
       '로비에서 파란 패드(▲)는 위층, 주황 패드(▼)는 아래층으로 이동합니다.',
       '이 앱에서는 1층에 선사·고대와 고려·조선·대한제국 전시실, 2층에 기증관·서화관·사유의 방, 3층에 도자·조각공예관과 세계문화관을 배치했습니다. 실제 층별 구성은 박물관 안내도로 확인하세요.',
@@ -1555,8 +1571,8 @@ function extConnect(){
       sp.textContent = '번호 원을 누르면 코스 지점, 방을 누르면 이름이 표시됩니다 · 이 구역 남은 별 ' + left + '개'; el.appendChild(sp);
     }
     const rs = document.createElement('button'); rs.textContent = '유물 원위치'; rs.className = 'ret'; rs.onclick = () => { resetItems(); }; el.appendChild(rs);
-    const rb = document.createElement('button'); rb.textContent = '이촌역으로 귀환'; rb.className = 'ret';
-    rb.onclick = () => { P.f = 0; P.x = -30; P.z = 38; me.g.position.set(P.x * K, 0, P.z * K); cd = 1; pub(true); toggleMap(false); toast('이촌역 앞으로 귀환했습니다'); };
+    const rb = document.createElement('button'); rb.textContent = '출발역으로 귀환'; rb.className = 'ret';
+    rb.onclick = () => { const H = window.__HOME || {n: '이촌역', x: -30, z: 38}; P.f = 0; P.x = H.x; P.z = H.z; me.g.position.set(P.x * K, 0, P.z * K); cd = 1; pub(true); toggleMap(false); toast(H.n + ' 앞으로 귀환했습니다'); };
     el.appendChild(rb);
   }
   function mapCol(r){
@@ -1582,6 +1598,7 @@ function extConnect(){
       ell(0, 30, 11, 7, '#6fb2e8'); ell(76, 8, 13, 8, '#6fb2e8'); ell(46, 28, 3.6, 3.6, '#8cc4ee');
       rect(-28, -34, 28, 16, '#cfc7b4', '#5b5446', 2); txt('국립중앙박물관', 0, -9, 14, '#3a3428');
       rect(-40, 35, -34, 41, '#2a4a8a'); txt('이촌역 2번 출구', -37, 44, 11, '#1b2a4a');
+      rect(27, 35, 33, 41, '#c4003a'); txt('판교역', 30, 44, 11, '#5a0020');
       [[86, 40, 8, 6, '기록관 1'], [86, 52, 8, 6, '기록관 2'], [56, 52, 10, 6, '카페 어울림'], [92, 20, 7, 6, '홍보관'], [92, 32, 7, 6, '용산서가'], [70, 58, 9, 6, '놀이터']].forEach(a => { rect(a[0] - a[2] / 2, a[1] - a[3] / 2, a[0] + a[2] / 2, a[1] + a[3] / 2, '#e4d7bd', '#8a7d62'); txt(a[4], a[0], a[1], 10); });
       txt('거울못', 0, 30, 11, '#fff'); txt('호수', 76, 8, 11, '#fff'); txt('분수', 46, 28, 10, '#1b3a5a'); txt('용산어린이정원', 52, 5, 12, '#2d6a3f');
       txt('주출입구', 99, 22, 10, '#2d6a3f'); c.fillStyle = '#2d6a3f'; c.fillRect(X(98.6), Z(24), 0.8 * s + 2, 6 * s);
@@ -1644,7 +1661,7 @@ function extConnect(){
   }
   $h('nick-save').onclick = saveNick; nin.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); saveNick(); } });
   function diagText(){
-    const L = ['버전 v23 · 연결 방식: ' + (window.__TRANSPORT || '-') + (R && R.broker ? ' (' + R.broker() + ')' : '') + ' · 실시간 객체: ' + (R ? '있음' : '없음(혼자 보기)')];
+    const L = ['버전 v24 · 연결 방식: ' + (window.__TRANSPORT || '-') + (R && R.broker ? ' (' + R.broker() + ')' : '') + ' · 실시간 객체: ' + (R ? '있음' : '없음(혼자 보기)')];
     if (R){
       let c = null; try { c = R.connected(); } catch (e) {}
       L.push('연결 상태: ' + c);
@@ -1656,6 +1673,7 @@ function extConnect(){
     L.push('내 위치: ' + Math.round(P.x) + ',' + Math.round(P.z) + ' 층=' + P.f);
     return L.join('\n');
   }
+  if (/[?&]diag/.test(location.search)) $h('diagbtn').style.display = 'block';
   $h('diagbtn').onclick = () => { const d = $h('diag'); d.hidden = !d.hidden; if (!d.hidden) d.textContent = diagText(); };
   setInterval(() => { const d = $h('diag'); if (!d.hidden) d.textContent = diagText(); }, 1000);
   $h('teambtn').onclick = () => openInfo($h('teamsel').hidden);
@@ -1667,12 +1685,21 @@ function extConnect(){
   let eTeam = TEAM;
   const eMark = () => { eBtns.forEach((b, i) => { b.classList.toggle('on', i === eTeam); b.style.background = i === eTeam ? TEAMC[i] : '#fff'; }); eGo.disabled = !(eIn.value.trim() && eTeam >= 0); };
   TEAMN.forEach((n, i) => { const b = document.createElement('button'); b.textContent = n; b.style.borderColor = TEAMC[i]; b.onclick = () => { eTeam = i; eMark(); }; $h('entry-teams').appendChild(b); eBtns.push(b); });
+  const STARTS = [{n: '이촌역', x: -30, z: 38, c: '#2a4a8a'}, {n: '판교역', x: 22, z: 38, c: '#c4003a'}];
+  let eStart = 0; try { const sv = parseInt(localStorage.getItem('ncm-start'), 10); if (sv >= 0 && sv < STARTS.length) eStart = sv; } catch (e) {}
+  window.__HOME = STARTS[eStart];
+  const sBtns = [];
+  const sMark = () => sBtns.forEach((b, i) => { b.classList.toggle('on', i === eStart); b.style.background = i === eStart ? STARTS[i].c : '#fff'; });
+  STARTS.forEach((st, i) => { const b = document.createElement('button'); b.textContent = st.n; b.style.borderColor = st.c; b.onclick = () => { eStart = i; window.__HOME = STARTS[i]; sMark(); }; $h('entry-start').appendChild(b); sBtns.push(b); });
+  sMark();
   eIn.value = NICK; eIn.oninput = eMark; eMark();
   function enterWorld(){
     const v = eIn.value.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 12);
     if (!v || eTeam < 0) return;
     NICK = v; try { localStorage.setItem('ncm-nick', NICK); } catch (e) {}
     TEAM = eTeam; try { localStorage.setItem('ncm-team', String(TEAM)); } catch (e) {}
+    try { localStorage.setItem('ncm-start', String(eStart)); } catch (e) {}
+    const H = STARTS[eStart]; P.f = 0; P.x = H.x; P.z = H.z; me.g.position.set(P.x * K, 0, P.z * K); cd = 1;
     window.__ENTERED = true; $h('entry').hidden = true;
     applyTeam(); sync(); pub(true); renderPeers();
     toast(TEAMN[TEAM] + ' · ' + NICK + ' 님, 환영합니다');
