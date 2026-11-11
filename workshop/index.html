@@ -421,6 +421,7 @@ const EXT_ROOM = 'ncmws-7f3kq9xv2m8dh4ztb6rp1yne';   // 추측하기 어려운 �
 const EXT_CHAT = true;                               // 말풍선/대화 내용을 외부 서버로 전달(끄려면 false)
 const EXT_BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://mqtt.eclipseprojects.io:443/mqtt'];
 window.__EXTLOG = [];
+window.__EXTSTAT = {tx: 0, rx: 0, sub: [], last: ''};
 try { document.addEventListener('securitypolicyviolation', e => { window.__EXTLOG.push('보안정책 차단: ' + e.blockedURI + ' (' + e.violatedDirective + ')'); }); } catch (e) {}
 function extConnect(){
   const brokers = window.__EXT_BROKERS || EXT_BROKERS;
@@ -443,7 +444,7 @@ function extConnect(){
     if (!ws || ws.readyState !== 1 || !conn) return;
     const pl = enc.encode(typeof obj === 'string' ? obj : JSON.stringify(obj));
     if (pl.length > 2000) return;
-    ws.send(pkt(0x30, [...str(topic), ...pl]));
+    ws.send(pkt(0x30, [...str(topic), ...pl])); window.__EXTSTAT.tx++;
   };
   const txPresence = () => { if (!window.__ENTERED || !Object.keys(mine).length) return; lastTx = Date.now(); send(tP, mine); };
   const onPub = (topic, pl) => {
@@ -474,7 +475,8 @@ function extConnect(){
       do { if (i >= buf.length) return; b = buf[i++]; len += (b & 127) * mul; mul *= 128; } while ((b & 128) && i < 5);
       if (buf.length < i + len) return;
       const type = buf[0] >> 4, body = buf.slice(i, i + len); buf = buf.slice(i + len);
-      if (type === 3){ const tl = body[0] << 8 | body[1]; onPub(dec.decode(body.slice(2, 2 + tl)), body.slice(2 + tl)); }
+      if (type === 9){ window.__EXTSTAT.sub.push(body[2] === 0x80 ? '거부' : '허용'); }
+      if (type === 3){ window.__EXTSTAT.rx++; const tl = body[0] << 8 | body[1]; window.__EXTSTAT.last = dec.decode(body.slice(2, 2 + tl)).split('/').slice(-2).join('/'); onPub(dec.decode(body.slice(2, 2 + tl)), body.slice(2 + tl)); }
     }
   };
   const fire = on => { fired = on; cH.forEach(h => { try { h(on); } catch (e) {} }); };
@@ -1255,7 +1257,7 @@ function extConnect(){
     const ch = Math.hypot(P.x - lastSent.x, P.z - lastSent.z) > 0.4 || P.f !== lastSent.f || cur !== lastSent.s || isGuide !== lastSent.g || got.size !== lastSent.k || TEAM !== lastSent.tm;
     if (!force && (!ch || now - lastPub < 250)) return;
     lastPub = now; lastSent = {x: P.x, z: P.z, f: P.f, s: cur, g: isGuide, k: got.size, tm: TEAM};
-    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, v: 22}).catch(() => {});
+    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, v: 23}).catch(() => {});
   }
   const num = v => (typeof v === 'number' && isFinite(v)) ? v : null;
   let lastRoom = '', lastInside = null;
@@ -1642,7 +1644,7 @@ function extConnect(){
   }
   $h('nick-save').onclick = saveNick; nin.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); saveNick(); } });
   function diagText(){
-    const L = ['버전 v22 · 연결 방식: ' + (window.__TRANSPORT || '-') + (R && R.broker ? ' (' + R.broker() + ')' : '') + ' · 실시간 객체: ' + (R ? '있음' : '없음(혼자 보기)')];
+    const L = ['버전 v23 · 연결 방식: ' + (window.__TRANSPORT || '-') + (R && R.broker ? ' (' + R.broker() + ')' : '') + ' · 실시간 객체: ' + (R ? '있음' : '없음(혼자 보기)')];
     if (R){
       let c = null; try { c = R.connected(); } catch (e) {}
       L.push('연결 상태: ' + c);
@@ -1650,6 +1652,7 @@ function extConnect(){
       ps.forEach((p, i) => { const q = p.presence || {}; L.push((i + 1) + '. ' + String(p.peer).slice(0, 6) + (p.isMe ? ' [나' + (p.sameTab ? '' : '-다른탭') + ']' : '') + ' kind=' + p.kind + ' guest=' + p.guest + ' 버전=' + (q.v === undefined ? '구버전/없음' : q.v) + ' 이름=' + String(q.n === undefined ? '-' : q.n).slice(0, 8) + ' 층=' + q.f + ' 위치=' + q.x + ',' + q.z + ' 팀=' + q.t); });
     }
     (window.__EXTLOG || []).forEach(x => L.push('외부서버: ' + x));
+    if (window.__EXTSTAT) L.push('보낸 메시지 ' + window.__EXTSTAT.tx + '건 · 받은 메시지 ' + window.__EXTSTAT.rx + '건 · 구독 응답 ' + (window.__EXTSTAT.sub.join(',') || '없음') + ' · 마지막 수신 ' + window.__EXTSTAT.last);
     L.push('내 위치: ' + Math.round(P.x) + ',' + Math.round(P.z) + ' 층=' + P.f);
     return L.join('\n');
   }
