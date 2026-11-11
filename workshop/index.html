@@ -106,6 +106,8 @@ textarea:disabled{opacity:.55}
 #entry .et{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #entry .et button{border:2px solid;background:#fff;color:#14201a;border-radius:12px;min-height:44px;font-size:14px;font-weight:700}
 #entry .et button.on{color:#fff}
+#entry .lk{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1.5px solid #c9d3cc;border-radius:10px;padding:6px 8px 6px 12px;font-size:14px;text-align:left}
+#entry .lk button{border:0;background:#e6f1fb;color:#1b3a5a;border-radius:8px;min-height:36px;padding:0 12px;font-weight:700}
 #entry .eg{margin-top:18px;width:100%;min-height:50px;border:0;border-radius:14px;background:#2d7a4f;color:#fff;font-size:17px;font-weight:800}
 #entry .eg:disabled{background:#b8c4bc}
 #entry .en{font-size:11px;color:#6a746d;margin-top:10px}
@@ -155,6 +157,8 @@ textarea:disabled{opacity:.55}
       <div class="et" id="entry-teams"></div>
       <div class="el">출발 장소</div>
       <div class="et" id="entry-start"></div>
+      <div class="el">내 외모</div>
+      <div class="lk"><span id="look-d1"></span><button type="button" id="look-b1">다시 뽑기</button></div>
       <button class="eg" id="entry-go" disabled>참석하기</button>
       <div class="en">이름과 팀을 정한 뒤 참석하기를 누르면 입장합니다. 이름과 위치는 같은 시간에 접속한 참석자에게 보입니다. 실명·업무 정보는 쓰지 마세요.</div>
     </div></div>
@@ -167,6 +171,8 @@ textarea:disabled{opacity:.55}
       <div class="nr"><input id="nick-in" maxlength="12" autocomplete="off"><button id="nick-save">저장</button></div>
       <div class="tt" style="margin-top:14px">소속 팀을 선택하세요</div>
       <div class="to" id="team-opts"></div>
+      <div class="tt" style="margin-top:14px">내 외모</div>
+      <div class="nr"><span id="look-d2" style="flex:1;font-size:13px"></span><button type="button" id="look-b2">다시 뽑기</button></div>
       <div class="tn">팀을 고르면 팀 색상의 화려한 의상으로 바뀝니다. 운용전략팀·증권운용팀·외화자금팀·잭·제프 중 하나를 고를 수 있어요. 우상단 버튼으로 언제든 바꿀 수 있어요.</div>
       <button id="team-x" class="tx">닫기</button>
     </div>
@@ -1144,7 +1150,31 @@ function extConnect(){
     const tg = new THREE.Sprite(new THREE.SpriteMaterial({transparent: true, depthTest: false}));
     tg.scale.set(2.4, 0.45, 1); tg.position.y = 2.35; tg.renderOrder = 11;
     g.add(body, head, hair, e1, e2, legL, legR, tg); scene.add(g);
-    return {g, body, legL, legR, tag: tg, tx: 0, tz: 0, f: 0, ph: 0, tk: '', mv: false, fx: null, dk: '', st: 0};
+    return {g, body, head, hair, legL, legR, tag: tg, tx: 0, tz: 0, f: 0, ph: 0, tk: '', mv: false, fx: null, dk: '', st: 0, lk: -1, lg: null, base: 0.85};
+  }
+  /* ---- 외형 다양화: 시드(0~99999) 하나로 피부색·머리 모양/색·키·체형·안경·배낭 등을 결정 ---- */
+  const SKIN = [0xf6d3b3, 0xf2c9a0, 0xe0ac82, 0xc68a5e, 0x8d5a3b], HAIRC = [0x1d1815, 0x2b2420, 0x5a3a22, 0x8a5a2a, 0xc9a24a, 0x7a2a2a, 0x555555, 0x2a3a6a], PANTS = [0x2e3440, 0x3a4a6a, 0x5a4a3a, 0x3a5a4a, 0x6a3a4a, 0x444444];
+  const HAIRN = ['짧은 머리', '긴 머리', '올림머리', '삭발', '모자', '곱슬머리'], ACCN = ['', '안경', '배낭', '목도리', '헤어밴드'];
+  function lookRng(seed){ let t = (seed * 2654435761 + 12345) >>> 0; return () => { t += 0x6D2B79F5; let r = Math.imul(t ^ t >>> 15, 1 | t); r ^= r + Math.imul(r ^ r >>> 7, 61 | r); return ((r ^ r >>> 14) >>> 0) / 4294967296; }; }
+  function lookDesc(seed){ const r = lookRng(seed); r(); r(); const h = HAIRN[r() * 6 | 0]; r(); r(); r(); const ac = ACCN[r() * 5 | 0]; return h + (ac ? ' · ' + ac : ''); }
+  function applyLook(a, seed){
+    seed = (seed | 0) % 100000; if (a.lk === seed) return; a.lk = seed;
+    if (a.lg){ a.g.remove(a.lg); a.lg.traverse(n => { if (n.geometry) n.geometry.dispose(); if (n.material) n.material.dispose(); }); a.lg = null; }
+    const r = lookRng(seed), pick = n => r() * n | 0;
+    const skin = SKIN[pick(5)], hc = HAIRC[pick(8)], hs = pick(6), hgt = 0.93 + r() * 0.14, wd = 0.9 + r() * 0.22, acc = pick(5), pc = PANTS[pick(6)];
+    a.head.material.color.set(skin); a.hair.material.color.set(hc); a.hair.visible = hs !== 3;
+    a.legL.material.color.set(pc); a.legR.material.color.set(pc);
+    a.g.scale.setScalar((a.base || 0.85) * hgt); a.body.scale.set(wd, 1, wd);
+    const lg = new THREE.Group(); const mh = M(hc), add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); lg.add(m); return m; };
+    if (hs === 1) add(new THREE.CylinderGeometry(0.3, 0.2, 0.7, 12), mh, 0, 1.3, -0.12);
+    if (hs === 2) add(new THREE.SphereGeometry(0.14, 10, 8), mh, 0, 1.93, -0.05);
+    if (hs === 4){ const hm = M(0x3a6a9a); add(new THREE.SphereGeometry(0.33, 14, 8, 0, 6.2832, 0, 1.2), hm, 0, 1.6, 0); add(new THREE.CylinderGeometry(0.34, 0.34, 0.03, 14), hm, 0, 1.6, 0.12); }
+    if (hs === 5) for (let i = 0; i < 9; i++){ const an = i / 9 * 6.2832; add(new THREE.SphereGeometry(0.1, 8, 6), mh, Math.sin(an) * 0.26, 1.78 + (i % 2) * 0.05, Math.cos(an) * 0.26); }
+    if (acc === 1){ const gm = M(0x111111); [-0.1, 0.1].forEach(x => { const t = new THREE.Mesh(new THREE.TorusGeometry(0.075, 0.012, 6, 14), gm); t.position.set(x, 1.57, 0.29); lg.add(t); }); }
+    if (acc === 2) add(new THREE.BoxGeometry(0.4, 0.5, 0.2), M(0x7a5a3a), 0, 0.95, -0.34);
+    if (acc === 3){ const t = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.07, 8, 16), M(0xd9534f)); t.rotation.x = Math.PI / 2; t.position.y = 1.26; lg.add(t); }
+    if (acc === 4){ const t = new THREE.Mesh(new THREE.TorusGeometry(0.31, 0.03, 6, 18), M(0xe86a8a)); t.rotation.x = Math.PI / 2; t.position.y = 1.7; lg.add(t); }
+    a.g.add(lg); a.lg = lg;
   }
   function setTag(a, name, mine, isG, tc){
     const k = name + '|' + mine + '|' + isG + '|' + tc;
@@ -1215,6 +1245,8 @@ function extConnect(){
 
   /* ---- player ---- */
   const me = makeAvatar(0xf2b84b);
+  let LOOK = Math.floor(Math.random() * 100000); try { const lv = parseInt(localStorage.getItem('ncm-look'), 10); if (lv >= 0 && lv < 100000) LOOK = lv; } catch (e) {}
+  applyLook(me, LOOK);
   const P = {x: -30, z: 38, f: 0};
   let lastCur = -1, lastPub = 0, lastSent = {x: 1e9, z: 1e9, f: -1, s: -1, g: null}, cd = 0;
   me.g.position.set(P.x * K, 0, P.z * K);
@@ -1266,10 +1298,10 @@ function extConnect(){
   function pub(force){
     if (!R || !window.__ENTERED) return;
     const now = Date.now();
-    const ch = Math.hypot(P.x - lastSent.x, P.z - lastSent.z) > 0.4 || P.f !== lastSent.f || cur !== lastSent.s || isGuide !== lastSent.g || got.size !== lastSent.k || TEAM !== lastSent.tm;
+    const ch = Math.hypot(P.x - lastSent.x, P.z - lastSent.z) > 0.4 || P.f !== lastSent.f || cur !== lastSent.s || isGuide !== lastSent.g || got.size !== lastSent.k || TEAM !== lastSent.tm || LOOK !== lastSent.lk;
     if (!force && (!ch || now - lastPub < 250)) return;
-    lastPub = now; lastSent = {x: P.x, z: P.z, f: P.f, s: cur, g: isGuide, k: got.size, tm: TEAM};
-    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, v: 24}).catch(() => {});
+    lastPub = now; lastSent = {x: P.x, z: P.z, f: P.f, s: cur, g: isGuide, k: got.size, tm: TEAM, lk: LOOK};
+    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, l: LOOK, v: 25}).catch(() => {});
   }
   const num = v => (typeof v === 'number' && isFinite(v)) ? v : null;
   let lastRoom = '', lastInside = null;
@@ -1289,6 +1321,7 @@ function extConnect(){
       if (!a){ a = makeAvatar(colorOf(key)); a.g.position.set(x * K, f * FH * K, z * K); peerA[key] = a; }
       a.tx = Math.max(-45, Math.min(110, x)); a.tz = Math.max(-45, Math.min(75, z)); a.f = Math.round(f);
       const pk = num(pr.k), pt = num(pr.t), ptv = (pt !== null && pt >= 0 && pt < 5) ? Math.round(pt) : -1;
+      const pl = num(pr.l); applyLook(a, pl !== null && pl >= 0 && pl < 100000 ? Math.round(pl) : 0);
       if (ptv >= 0) a.body.material.color.set(TEAMC[ptv]);
       dress(a, ptv, pk !== null ? lvOf(Math.max(0, Math.min(99, pk))) : 1);
       setTag(a, (ptv >= 0 ? TEAMN[ptv].slice(0, 2) + ' ' : '') + (pk !== null ? 'Lv.' + lvOf(Math.max(0, Math.min(99, pk))) + ' ' : '') + ((typeof pr.n === 'string' && pr.n.trim()) ? pr.n.trim().slice(0, 16) : '참가자'), false, pr.g === true, ptv >= 0 ? TEAMC[ptv] : null);
@@ -1661,7 +1694,7 @@ function extConnect(){
   }
   $h('nick-save').onclick = saveNick; nin.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); saveNick(); } });
   function diagText(){
-    const L = ['버전 v24 · 연결 방식: ' + (window.__TRANSPORT || '-') + (R && R.broker ? ' (' + R.broker() + ')' : '') + ' · 실시간 객체: ' + (R ? '있음' : '없음(혼자 보기)')];
+    const L = ['버전 v25 · 연결 방식: ' + (window.__TRANSPORT || '-') + (R && R.broker ? ' (' + R.broker() + ')' : '') + ' · 실시간 객체: ' + (R ? '있음' : '없음(혼자 보기)')];
     if (R){
       let c = null; try { c = R.connected(); } catch (e) {}
       L.push('연결 상태: ' + c);
@@ -1681,6 +1714,9 @@ function extConnect(){
   applyTeam();
   /* ---- 참석하기(입장) 화면: 이름·팀을 정한 뒤 입장해야 다른 참석자에게 내가 보임 ---- */
   window.addEventListener('keydown', e => { if (!window.__ENTERED && !(e.target && e.target.tagName === 'INPUT')) e.stopImmediatePropagation(); }, true);
+  function rollLook(){ LOOK = Math.floor(Math.random() * 100000); try { localStorage.setItem('ncm-look', String(LOOK)); } catch (e) {} applyLook(me, LOOK); lookTxt(); if (window.__ENTERED){ pub(true); toast('외모를 바꿨습니다'); } }
+  function lookTxt(){ const d = lookDesc(LOOK); $h('look-d1').textContent = d; $h('look-d2').textContent = d; }
+  $h('look-b1').onclick = rollLook; $h('look-b2').onclick = rollLook; lookTxt();
   const eIn = $h('entry-name'), eGo = $h('entry-go'), eBtns = [];
   let eTeam = TEAM;
   const eMark = () => { eBtns.forEach((b, i) => { b.classList.toggle('on', i === eTeam); b.style.background = i === eTeam ? TEAMC[i] : '#fff'; }); eGo.disabled = !(eIn.value.trim() && eTeam >= 0); };
@@ -1760,6 +1796,8 @@ function extConnect(){
   const SHIRTS = [0xd9534f, 0x4a8fd6, 0xe8b84a, 0x7a5aa8, 0x3f9a6a, 0xe86a8a, 0x8a8a8a, 0xf08a3a, 0x2f6fa0, 0xb85a3a];
   const CLINES = {
     family: ['오늘 날씨 좋다', '토끼 보러 갈까?', '조금만 더 걸으면 카페야', '박물관 구경하고 간식 먹자', '아이가 신났네요'],
+    visitor: ['이 유물은 설명이 자세하네', '조금 더 가까이서 볼까?', '여기 사진 찍어도 되나?', '다음 전시실도 가 보자', '생각보다 크다'],
+    kids: ['나 잡아 봐!', '오리다! 오리!', '토끼 어디 있어?', '더 놀고 싶어요', '우와 크다!'],
     couple: ['사진 찍어 줄까?', '여기 분위기 좋다', '다음엔 박물관 안도 천천히 보자', '산책하기 좋은 날이야', '저쪽으로 가 볼까?']
   };
   const mkPath = pts => { const L = [0]; for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); return {pts, L, len: L[L.length - 1]}; };
@@ -1770,16 +1808,17 @@ function extConnect(){
   }
   let colI = 3;
   function person(child){
-    const a = makeAvatar(SHIRTS[colI++ % SHIRTS.length]); a.tag.visible = false; if (child) a.g.scale.setScalar(0.5); return a;
+    const a = makeAvatar(SHIRTS[colI++ % SHIRTS.length]); a.tag.visible = false; a.base = child ? 0.5 : 0.85; applyLook(a, Math.floor(Math.random() * 100000)); return a;
   }
-  function walkers(kind, pts, speed, s0, members){
-    const g = {kind, path: mkPath(pts), speed, s: s0, dir: 1, pause: 0, nextSay: 3000 + Math.random() * 8000, members: members.map(m => ({a: person(m.child), along: m.along, side: m.side, child: !!m.child}))};
+  function walkers(kind, pts, speed, s0, members, fl){
+    const g = {fl: fl || 0, kind, path: mkPath(pts), speed, s: s0, dir: 1, pause: 0, nextSay: 3000 + Math.random() * 8000, members: members.map(m => ({a: person(m.child), along: m.along, side: m.side, child: !!m.child}))};
     CROWD.push(g);
   }
-  function standers(kind, face, members){
-    const g = {kind, stand: true, nextSay: 4000 + Math.random() * 10000, members: members.map(m => {
+  function standers(kind, face, members, fl){
+    fl = fl || 0;
+    const g = {fl, kind, stand: true, nextSay: 4000 + Math.random() * 10000, members: members.map(m => {
       const a = person(m.child); a.g.rotation.y = Math.atan2(face[0] - m[0], face[1] - m[1]);
-      a.g.position.set(m[0] * K, 0, m[1] * K); CIRC.push([m[0], m[1], 0.5, 0]);
+      a.g.position.set(m[0] * K, fl * FH * K, m[1] * K); CIRC.push([m[0], m[1], 0.5, fl]);
       return {a, x: m[0], z: m[1], child: !!m.child};
     })};
     CROWD.push(g);
@@ -1790,7 +1829,69 @@ function extConnect(){
   walkers('couple', [[77, 46], [66, 42], [60, 39], [57, 48], [56, 58]], 1.2, 10, [{along: 0, side: -0.8}, {along: 0, side: 0.8}]);
   standers('couple', [0, 33], [Object.assign([-0.9, 41], {}), Object.assign([0.9, 41], {})]);
   standers('family', [60, 34], [Object.assign([58.4, 30.4], {}), Object.assign([60, 30.8], {child: true}), Object.assign([61.6, 30.4], {})]);
+  /* 박물관 안 관람객(층별) · 정원 아이들 */
+  function freeSpot(x, z, f, face){
+    for (const r of [1.4, 2, 2.6]) for (let k = 0; k < 8; k++){ const an = k / 8 * 6.2832, px = x + Math.cos(an) * r, pz = z + Math.sin(an) * r; if (!blocked(px, pz, f)) return [px, pz]; }
+    return null;
+  }
+  function standAt(kind, x, z, f, n, kids){
+    const mem = []; for (let i = 0; i < n; i++){ const p = freeSpot(x + i * 0.9, z, f); if (p){ const m = Object.assign([p[0], p[1]], kids && i > 0 ? {child: true} : {}); mem.push(m); } }
+    if (mem.length) standers(kind, [x, z], mem, f);
+  }
+  walkers('visitor', [[20, -4], [20, -12], [20, -20], [20, -28]], 1.0, 2, [{along: 0, side: 0.6}, {along: 0.7, side: -0.6}], 0);
+  walkers('visitor', [[-20, -24], [-12, -24], [-5, -18]], 0.9, 3, [{along: 0, side: 0}], 0);
+  walkers('family', [[0, 16], [0, 9], [8, 2], [12, 0]], 1.1, 0, [{along: 0, side: -0.7}, {along: 0.3, side: 0, child: true}, {along: 0, side: 0.7}], 0);
+  walkers('visitor', [[-20, -8], [-12, -8], [0, -4], [12, 0], [20, 0]], 1.0, 6, [{along: 0, side: 0.6}, {along: 0.7, side: -0.6}], 1);
+  walkers('visitor', [[-6, 4], [-6, -4], [-12, -8]], 0.9, 1, [{along: 0, side: 0}], 1);
+  walkers('visitor', [[-20, -16], [-20, -12], [-20, -4], [-20, 0]], 0.9, 1, [{along: 0, side: 0.6}, {along: 0.7, side: -0.4}], 2);
+  walkers('visitor', [[-20, 0], [-12, 0], [0, 6]], 1.0, 4, [{along: 0, side: 0}, {along: 0.8, side: 0.5}], 2);
+  standAt('visitor', 20, -8, 0, 2); standAt('visitor', 20, -20, 0, 2); standAt('visitor', -20, -24, 0, 2); standAt('visitor', -5, -17, 0, 1);
+  standAt('visitor', -20, -8, 1, 2); standAt('visitor', 20, 0, 1, 2); standAt('visitor', 0, -4, 1, 1);
+  standAt('visitor', -20, -16, 2, 2); standAt('visitor', -20, 0, 2, 2); standAt('visitor', -6, -8, 2, 1);
+  walkers('kids', [[40, 30], [46, 36], [52, 30], [46, 24]], 2.0, 0, [{along: 0, side: -0.8, child: true}, {along: 0.7, side: 0.6, child: true}, {along: 1.4, side: -0.2, child: true}], 0);
+  walkers('kids', [[70, 56], [64, 50], [70, 44]], 2.1, 0, [{along: 0, side: 0, child: true}, {along: 0.8, side: 0.7, child: true}], 0);
+  standAt('kids', 76, 17, 0, 3, true); standAt('kids', 70, 53, 0, 3, true); standAt('kids', 62, 26, 0, 2, true);
+  /* 정원 동물(오리·토끼·강아지): 충돌 없이 정해진 구역을 돌아다님 */
+  const ANI = [];
+  function animal(type, cx, cz, rx, rz, spd, ph){
+    const g = new THREE.Group(), mm = (c) => M(c);
+    if (type === 'duck'){
+      const b = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 8), mm(0xf4f0e0)); b.scale.set(0.8, 0.6, 1.1); b.position.y = 0.25;
+      const h = new THREE.Mesh(new THREE.SphereGeometry(0.17, 10, 8), mm(0x2f7a4a)); h.position.set(0, 0.55, 0.28);
+      const k = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.16, 6), mm(0xf0a020)); k.rotation.x = Math.PI / 2; k.position.set(0, 0.52, 0.47);
+      g.add(b, h, k);
+    } else if (type === 'rabbit'){
+      const b = new THREE.Mesh(new THREE.SphereGeometry(0.22, 10, 8), mm(0xb8aa98)); b.scale.set(0.8, 0.8, 1.2); b.position.y = 0.22;
+      const h = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), mm(0xc4b6a4)); h.position.set(0, 0.38, 0.24);
+      const e1 = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.3, 6), mm(0xc4b6a4)); e1.position.set(-0.06, 0.62, 0.22); e1.rotation.z = 0.15;
+      const e2 = e1.clone(); e2.position.x = 0.06; e2.rotation.z = -0.15;
+      const t = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), mm(0xffffff)); t.position.set(0, 0.25, -0.26);
+      g.add(b, h, e1, e2, t);
+    } else {
+      const b = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.3, 0.7), mm(0xb07a3a)); b.position.y = 0.45;
+      const h = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.26, 0.3), mm(0xc08a4a)); h.position.set(0, 0.62, 0.45);
+      const n = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.08, 0.1), mm(0x222222)); n.position.set(0, 0.6, 0.62);
+      const tl = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.3), mm(0xb07a3a)); tl.position.set(0, 0.6, -0.5); tl.rotation.x = -0.6;
+      g.add(b, h, n, tl);
+      [[-0.12, 0.3], [0.12, 0.3], [-0.12, -0.3], [0.12, -0.3]].forEach(p => { const l = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.3, 0.08), mm(0x9a6a2a)); l.position.set(p[0], 0.15, p[1]); g.add(l); });
+    }
+    scene.add(g); ANI.push({g, type, cx, cz, rx, rz, spd, ph});
+  }
+  [[76, 8, 8, 4, 0.18, 0], [76, 8, 5, 2.6, -0.22, 2], [76, 8, 10, 5.5, 0.15, 4], [76, 8, 6.5, 3.2, -0.17, 5.5]].forEach(a => animal('duck', a[0], a[1], a[2], a[3], a[4], a[5]));
+  [[58, 50, 2.6, 2, 0.35, 0], [64, 52, 2.2, 1.6, -0.4, 2], [50, 44, 2.4, 1.8, 0.3, 4]].forEach(a => animal('rabbit', a[0], a[1], a[2], a[3], a[4], a[5]));
+  [[48, 36, 5, 3.5, 0.5, 0], [72, 50, 4, 3, -0.55, 3]].forEach(a => animal('dog', a[0], a[1], a[2], a[3], a[4], a[5]));
+  function animalTick(now){
+    const t = now / 1000, out = P.f === 0;
+    ANI.forEach((o, i) => {
+      o.g.visible = out; if (!out) return;
+      const th = o.ph + t * o.spd, x = o.cx + o.rx * Math.cos(th), z = o.cz + o.rz * Math.sin(th);
+      const dx = -o.rx * Math.sin(th) * Math.sign(o.spd), dz = o.rz * Math.cos(th) * Math.sign(o.spd);
+      o.g.position.set(x * K, o.type === 'rabbit' ? Math.max(0, Math.sin(t * 6 + i)) * 0.22 : (o.type === 'duck' ? 0.03 + Math.sin(t * 2 + i) * 0.015 : Math.abs(Math.sin(t * 7 + i)) * 0.05), z * K);
+      o.g.rotation.y = Math.atan2(dx, dz);
+    });
+  }
   function crowdTick(dt, now){
+    animalTick(now);
     const out = P.f === 0;
     CROWD.forEach(g => {
       if (!g.stand){
@@ -1801,14 +1902,14 @@ function extConnect(){
         const q = pathAt(g.path, g.s), hx = q.dx * g.dir, hz = q.dz * g.dir, mv = g.pause <= 0;
         g.members.forEach(m => {
           const x = q.x - hx * m.along + hz * m.side, z = q.z - hz * m.along - hx * m.side;
-          m.x = x; m.z = z; m.a.g.position.set(x * K, 0, z * K); m.a.g.rotation.y = Math.atan2(hx, hz); anim(m.a, mv, dt);
+          m.x = x; m.z = z; m.a.g.position.set(x * K, g.fl * FH * K, z * K); m.a.g.rotation.y = Math.atan2(hx, hz); anim(m.a, mv, dt);
         });
       }
       const near = g.members[0] && Math.hypot(g.members[0].x - P.x, g.members[0].z - P.z) < 22;
-      g.members.forEach(m => { m.a.g.visible = out; });
-      if (out && near && now > g.nextSay){
+      g.members.forEach(m => { m.a.g.visible = g.fl === P.f; });
+      if (g.fl === P.f && near && now > g.nextSay){
         g.nextSay = now + 14000 + Math.random() * 16000;
-        const adults = g.members.filter(m => !m.child), m = adults[Math.floor(Math.random() * adults.length)], L = CLINES[g.kind];
+        const adults = g.members.filter(m => !m.child), pool = adults.length ? adults : g.members, m = pool[Math.floor(Math.random() * pool.length)], L = CLINES[g.kind];
         if (m) bubble(m.a, L[Math.floor(Math.random() * L.length)]);
       }
     });
@@ -1909,7 +2010,7 @@ function extConnect(){
   /* ---- 점프 ---- */
   let jh = 0, vy = 0;
   window.S3.dbg = () => ({jh, f: P.f, x: P.x, z: P.z, held, team: TEAM});
-  window.S3.setTeam = setTeam;
+  window.S3.setTeam = setTeam; window.S3.tp = (x, z, f) => { P.x = x; P.z = z; P.f = f; me.g.position.set(x * K, f * FH * K, z * K); cd = 1; };
   /* ---- 모바일 조이스틱 + 점프 버튼 ---- */
   (function(){
     const touch = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || (navigator.maxTouchPoints || 0) > 0;
