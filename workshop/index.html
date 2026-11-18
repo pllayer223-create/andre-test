@@ -1303,11 +1303,11 @@ function extConnect(){
   let TEAM = -1; try { const tv = parseInt(localStorage.getItem('ncm-team'), 10); if (tv >= 0 && tv < 5) TEAM = tv; } catch (e) {}
   function pub(force){
     if (!R || !window.__ENTERED) return;
-    const now = Date.now();
-    const ch = Math.hypot(P.x - lastSent.x, P.z - lastSent.z) > 0.4 || P.f !== lastSent.f || cur !== lastSent.s || isGuide !== lastSent.g || got.size !== lastSent.k || TEAM !== lastSent.tm || LOOK !== lastSent.lk || !!seat !== lastSent.q;
+    const now = Date.now(); const pq = seat ? (seat.floor ? 2 : 1) : 0;
+    const ch = Math.hypot(P.x - lastSent.x, P.z - lastSent.z) > 0.4 || P.f !== lastSent.f || cur !== lastSent.s || isGuide !== lastSent.g || got.size !== lastSent.k || TEAM !== lastSent.tm || LOOK !== lastSent.lk || pq !== lastSent.q;
     if (!force && (!ch || now - lastPub < 250)) return;
-    lastPub = now; lastSent = {x: P.x, z: P.z, f: P.f, s: cur, g: isGuide, k: got.size, tm: TEAM, lk: LOOK, q: !!seat};
-    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, l: LOOK, q: seat ? 1 : 0, v: 26}).catch(() => {});
+    lastPub = now; lastSent = {x: P.x, z: P.z, f: P.f, s: cur, g: isGuide, k: got.size, tm: TEAM, lk: LOOK, q: pq};
+    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, l: LOOK, q: pq, v: 27}).catch(() => {});
   }
   const num = v => (typeof v === 'number' && isFinite(v)) ? v : null;
   let lastRoom = '', lastInside = null;
@@ -1328,7 +1328,7 @@ function extConnect(){
       a.tx = Math.max(-45, Math.min(110, x)); a.tz = Math.max(-45, Math.min(75, z)); a.f = Math.round(f);
       const pk = num(pr.k), pt = num(pr.t), ptv = (pt !== null && pt >= 0 && pt < 5) ? Math.round(pt) : -1;
       const pl = num(pr.l); applyLook(a, pl !== null && pl >= 0 && pl < 100000 ? Math.round(pl) : 0);
-      a.sit = pr.q === 1;
+      a.sit = pr.q === 1 || pr.q === 2; a.sitDy = pr.q === 2 ? -0.5 : SITDY;
       if (ptv >= 0) a.body.material.color.set(TEAMC[ptv]);
       dress(a, ptv, pk !== null ? lvOf(Math.max(0, Math.min(99, pk))) : 1);
       setTag(a, (ptv >= 0 ? TEAMN[ptv].slice(0, 2) + ' ' : '') + (pk !== null ? 'Lv.' + lvOf(Math.max(0, Math.min(99, pk))) + ' ' : '') + ((typeof pr.n === 'string' && pr.n.trim()) ? pr.n.trim().slice(0, 16) : '참가자'), false, pr.g === true, ptv >= 0 ? TEAMC[ptv] : null);
@@ -1498,6 +1498,7 @@ function extConnect(){
     {name: '현대본가 직원', x: 21.4, z: 53.4, f: 0, ry: 1.57, c: 0xb02a2a, pages: [
       '어서 오세요, 현대본가입니다. (이 식당 내부는 점심 장소를 표현한 개념 구성입니다.)',
       '벽의 메뉴판을 눌러 보세요. 외부 정보 사이트에 소개된 소고기 메뉴를 정리해 두었습니다. 가격과 영업시간은 확인하지 못해 적지 않았어요.',
+      '오늘은 2027학년도 수능일(11월 19일)입니다. 수험생과 가족을 떠올리며 식사해 보세요. 한국에서는 수험생에게 미역국을 챙겨 주는 풍습이 있어요(풍습 설명이며, 식당 메뉴와는 무관합니다).',
       '식사 자리에서는 오전 코스에서 가장 인상 깊었던 전시를 한 가지씩 이야기해 보세요. 마지막 별은 주방 쪽 카운터 옆에 있어요.']},
     {name: '주방 담당', x: 8.9, z: 59.6, f: 0, ry: 1.57, c: 0xe8e0d0, pages: [
       '숯불 앞에서는 고기를 한꺼번에 많이 올리지 않는 편이 좋아요. 불판 온도가 떨어지지 않아 겉은 노릇하고 속은 촉촉하게 구워집니다.',
@@ -1823,15 +1824,15 @@ function extConnect(){
   }
   function sitDown(s){
     if (seat || !s) return; if (held >= 0) dropHeld();
-    seat = s; P.x = s.x; P.z = s.z; jh = 0; vy = 0; me.g.rotation.y = s.r; cd = 1; pub(true); toast('앉았습니다 · 움직이거나 Space/C를 누르면 일어납니다');
+    seat = Object.assign({dy: s.floor ? -0.5 : SITDY}, s); P.x = s.x; P.z = s.z; jh = 0; vy = 0; me.g.rotation.y = s.r; cd = 1; pub(true); toast(s.floor ? '바닥에 앉았습니다 · 움직이거나 C를 누르면 일어납니다' : '앉았습니다 · 움직이거나 Space/C를 누르면 일어납니다');
   }
   function standUp(){ if (!seat) return; const s = seat; seat = null; P.x = s.x - Math.sin(s.r) * 1.1; P.z = s.z - Math.cos(s.r) * 1.1; if (blocked(P.x, P.z, P.f)){ P.x = s.x; P.z = s.z; } pub(true); }
-  function toggleSit(){ if (seat) standUp(); else sitDown(nearSeat()); }
+  function toggleSit(){ if (seat) standUp(); else sitDown(nearSeat() || {x: P.x, z: P.z, r: me.g.rotation.y, floor: true}); }
   $h('sitbtn').onclick = toggleSit;
   window.addEventListener('keydown', e => { const t = e.target && e.target.tagName; if (t === 'TEXTAREA' || t === 'INPUT' || e.repeat) return; if (e.key.toLowerCase() === 'c') toggleSit(); });
   let sitKey = '';
   function sitTick(){
-    const b = $h('sitbtn'); let txt = seat ? '일어나기 (C)' : (nearSeat() ? '앉기 (C)' : '');
+    const b = $h('sitbtn'); let txt = seat ? '일어나기 (C)' : (nearSeat() ? '앉기 (C)' : '바닥에 앉기 (C)');
     if (!txt){ b.hidden = true; sitKey = ''; return; } if (txt !== sitKey){ b.textContent = txt; sitKey = txt; } b.hidden = false;
   }
 
@@ -1912,6 +1913,7 @@ function extConnect(){
     c.fillStyle = '#f2d27a'; c.textAlign = 'center'; c.font = '700 34px ' + FONT; c.fillText('현대본가 · 메뉴 (예시)', 320, 58);
     c.fillStyle = '#fff'; c.font = '600 26px ' + FONT;
     ['한우 특수부위 · 안심 · 등심', '차돌박이 · 한우육회', '찌개 · 곰탕 · 열무국수'].forEach((t, i) => c.fillText(t, 320, 118 + i * 48));
+    c.fillStyle = '#f2d27a'; c.font = '600 22px ' + FONT; c.fillText('수능 응원 · 2026.11.19', 320, 232);
     c.fillStyle = '#c9b48a'; c.font = '500 19px ' + FONT; c.fillText('외부 정보 사이트 기준 · 가격/영업시간 미확인 · 인테리어는 개념 구성', 320, 300);
     const bm = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 2.76), new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(cv)})); bm.position.set(18, 1.55, 50.22);
     const bh = new THREE.Group(); bh.add(bm); RG.add(bh); reg(bh, 'gh_menu', 18, 51.6, 0, '현대본가', 16, null);
@@ -2050,7 +2052,7 @@ function extConnect(){
     13: '넓은 잔디마당과 마시멜로 토끼 조형물이 있는 곳으로 구성했습니다.',
     14: '잠시 쉬어 가는 카페 구간입니다.',
     15: '정원 코스의 끝입니다. 다음은 점심 식사입니다. 노란 화살표를 따라 현대본가로 이동해 보세요.',
-    16: '점심 장소인 소고기 식당 현대본가입니다. 식당 내부는 이 앱의 개념 구성이고, 실제 메뉴·가격·영업시간은 방문 전에 확인해 주세요. 식사하며 팀 마무리 이야기를 나눠 보세요.'
+    16: '점심 장소인 소고기 식당 현대본가입니다. 오늘은 수능일이라 수험생을 응원하는 마음으로 식사해 보세요. 식당 내부는 이 앱의 개념 구성이고, 실제 메뉴·가격·영업시간은 방문 전에 확인해 주세요.'
   };
   const TS = () => window.__TS || 1;
   let tPrev = false, tStarted = false, ti = 1, tState = 'walk', tWait = 0, tPadWait = 0;
@@ -2159,7 +2161,7 @@ function extConnect(){
     if (keys[' '] && jh <= 0.001 && vy <= 0) vy = 7.5;
     vy -= 24 * dt; jh += vy * dt; if (jh <= 0){ jh = 0; vy = 0; }
     anim(me, moving, dt); me.g.position.set(P.x * K, (P.f * FH + jh) * K, P.z * K);
-    if (seat){ me.legL.rotation.x = me.legR.rotation.x = -1.45; me.g.position.y += SITDY; me.g.position.x = P.x * K; me.g.position.z = P.z * K; }
+    if (seat){ me.legL.rotation.x = me.legR.rotation.x = -1.45; me.g.position.y += seat.dy; me.g.position.x = P.x * K; me.g.position.z = P.z * K; }
     // stairs
     if (cd > 0) cd -= dt;
     else PADS.forEach(p => {
@@ -2171,7 +2173,7 @@ function extConnect(){
       const mv = d > 0.1;
       if (mv){ const s = Math.min(d, 6 * dt); a.g.position.x += gx / d * s; a.g.position.z += gz / d * s; a.g.rotation.y = Math.atan2(gx, gz); }
       a.g.position.y = a.f * FH * K; a.g.visible = a.f === P.f; anim(a, mv, dt);
-      if (a.sit && !mv){ a.legL.rotation.x = a.legR.rotation.x = -1.45; a.g.position.y += SITDY; }
+      if (a.sit && !mv){ a.legL.rotation.x = a.legR.rotation.x = -1.45; a.g.position.y += a.sitDy; }
     });
     G.forEach((g, i) => { g.visible = i === P.f; }); OUT.visible = P.f === 0;
     spinners.forEach(n => { n.rotation.y += dt * 0.5; });
