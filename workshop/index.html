@@ -257,7 +257,8 @@ const STOPS = [
   {f:0, t:"기록관 1·2", n:"용산어린이정원"},
   {f:0, t:"잔디마당", n:"용산어린이정원 (마시멜로 토끼 조형물)"},
   {f:0, t:"카페 어울림", n:"용산어린이정원"},
-  {f:0, t:"홍보관·용산서가", n:"용산어린이정원 (주출입구)"}
+  {f:0, t:"홍보관·용산서가", n:"용산어린이정원 (주출입구)"},
+  {f:0, t:"현대본가", n:"점심 · 소고기 식당 (개념 구성)"}
 ];
 const FL = f => f ? f + '층' : '야외';
 
@@ -900,7 +901,8 @@ function extConnect(){
     [0, [[46, 33], [56, 40], [66, 44], [77, 46]]],
     [0, [[77, 46], [66, 42], [60, 39]]],
     [0, [[60, 39], [57, 48], [56, 58]]],
-    [0, [[56, 58], [70, 50], [80, 34], [86, 27]]]
+    [0, [[56, 58], [70, 50], [80, 34], [86, 27]]],
+    [0, [[86, 27], [80, 34], [78, 46], [56, 47], [50, 47], [46, 56], [40, 58], [27, 57], [24.8, 57], [20.5, 57]]]
   ];
   (function(){
     const per = {0: [], 1: [], 2: []};
@@ -977,7 +979,7 @@ function extConnect(){
   });
   const mg = tag('주출입구', 4, '#fff', 'rgba(31,90,53,.92)', null); mg.position.set(99, 5, 27); OUT.add(mg); OUT.add(box(0.6, 4, 0.6, 0x6b5a48, 99, 2, 24), box(0.6, 4, 0.6, 0x6b5a48, 99, 2, 30), box(0.7, 0.6, 6.8, 0x2d7a4f, 99, 4.2, 27));
   // 정원 방위 안내
-  SP[11] = {f: 0, x: 46, z: 33}; SP[12] = {f: 0, x: 77, z: 46}; SP[13] = {f: 0, x: 60, z: 39}; SP[14] = {f: 0, x: 56, z: 58}; SP[15] = {f: 0, x: 86, z: 27};
+  SP[11] = {f: 0, x: 46, z: 33}; SP[12] = {f: 0, x: 77, z: 46}; SP[13] = {f: 0, x: 60, z: 39}; SP[14] = {f: 0, x: 56, z: 58}; SP[15] = {f: 0, x: 86, z: 27}; SP[16] = {f: 0, x: 20.5, z: 57};
   // 이촌역 2번 출구 (4호선·경의중앙선) · 박물관 서문 방향 (개념 배치)
   flat(14, 16, 0xb9ad92, -35, 38, 0.012);
   (function(){
@@ -1037,6 +1039,7 @@ function extConnect(){
     for (const b of OB) if (x > b[0] - 2.5 && x < b[2] + 2.5 && z > b[1] - 2.5 && z < b[3] + 2.5) return false;
     if (Math.hypot(x - 46, z - 28) < 7 || Math.hypot(x - 60, z - 34) < 5 || Math.hypot(x - 70, z - 58) < 8) return false;
     if (z > 14.5 && z < 17.5) return false;
+    if (x > 2 && x < 28 && z > 46 && z < 68) return false;
     if (x < -26 && x > -42 && z > 30 && z < 46) return false;
     if (x < -10 && x > -34 && z > 30 && z < 44 && Math.abs(z - 38 + (x + 30) * 0.25) < 5) return false;
     return true;
@@ -1329,7 +1332,7 @@ function extConnect(){
     });
     Object.keys(peerA).forEach(k => { if (!seen.has(k)){ removeAvatar(peerA[k]); delete peerA[k]; } });
     const rm = roomAt(P.f, P.x, P.z);
-    const where = rm ? ((P.f + 1) + '층 · ' + rm.name) : (P.x > 33 ? '야외 · 용산어린이정원' : (P.x < -29 && P.z > 30 ? '야외 · 이촌역 2번 출구 앞' : (P.x > 20 && P.z > 32 ? '야외 · 판교역 앞' : '야외 · 열린마당')));
+    const where = rm ? (rm.resto ? '점심 · ' + rm.name : (P.f + 1) + '층 · ' + rm.name) : (P.x > 33 ? '야외 · 용산어린이정원' : (P.x < -29 && P.z > 30 ? '야외 · 이촌역 2번 출구 앞' : (P.x > 20 && P.z > 32 ? '야외 · 판교역 앞' : '야외 · 열린마당')));
     const here = 1 + Object.keys(peerA).filter(k => peerA[k].f === P.f).length;
     $h('h-count').textContent = (R ? Math.max(ps.length, 1) + '명 접속' : '혼자 보기(실시간 연결 안 됨)') + ' · 같은 층 ' + here + '명 · Lv.' + lvOf(got.size) + ' ' + title() + ' · ★ ' + got.size + '/' + STAR_N + ' · ' + NICK;
     $h('h-place').textContent = where;
@@ -1356,7 +1359,7 @@ function extConnect(){
   /* ---- 별 모으기 (미니게임) ---- */
   const STARS = [];
   ROOMS.forEach(r => { if (r.kind === 'lobby' || r.closed) return; STARS.push({f: r.f, x: r.kind === 'hall' ? r.cx + 7 : r.cx + (r.cx < 0 ? -6.4 : 6.4), z: r.kind === 'hall' ? r.cz + 4 : r.cz}); });
-  [[-20, 27], [20, 36], [-30, 46], [40, 10], [52, 14], [64, 22], [92, 46], [48, 56], [70, 40], [92, 12], [60, 20]].forEach(a => STARS.push({f: 0, x: a[0], z: a[1]}));
+  [[-20, 27], [20, 36], [-30, 46], [40, 10], [52, 14], [64, 22], [92, 46], [48, 56], [70, 40], [92, 12], [60, 20], [9.5, 57]].forEach(a => STARS.push({f: 0, x: a[0], z: a[1]}));
   let got = new Set();
   try { JSON.parse(localStorage.getItem('ncm-stars') || '[]').forEach(i => { if (Number.isInteger(i)) got.add(i); }); } catch (e) {}
   STARS.forEach((s, i) => {
@@ -1488,6 +1491,13 @@ function extConnect(){
       '판교역에서 출발하는 분들도 환영합니다. 이 앱의 판교역은 신분당선·경강선 역을 모티브로 한 가상의 출발 지점이며, 실제 이동 경로와는 무관합니다.',
       '왼쪽(서쪽)으로 열린마당을 가로질러 박물관 정문으로 걸어가 보세요. 이촌역에서 출발한 동료들과 마당에서 만나게 됩니다.',
       '팀 미션: 마당에서 같은 팀 동료를 찾아 인사하고, 서로 오늘 가장 기대되는 전시를 한 가지씩 이야기해 보세요.']},
+    {name: '현대본가 직원', x: 21.4, z: 53.4, f: 0, ry: 1.57, c: 0xb02a2a, pages: [
+      '어서 오세요, 현대본가입니다. (이 식당 내부는 점심 장소를 표현한 개념 구성입니다.)',
+      '벽의 메뉴판을 눌러 보세요. 외부 정보 사이트에 소개된 소고기 메뉴를 정리해 두었습니다. 가격과 영업시간은 확인하지 못해 적지 않았어요.',
+      '식사 자리에서는 오전 코스에서 가장 인상 깊었던 전시를 한 가지씩 이야기해 보세요. 마지막 별은 주방 쪽 카운터 옆에 있어요.']},
+    {name: '주방 담당', x: 8.9, z: 59.6, f: 0, ry: 1.57, c: 0xe8e0d0, pages: [
+      '숯불 앞에서는 고기를 한꺼번에 많이 올리지 않는 편이 좋아요. 불판 온도가 떨어지지 않아 겉은 노릇하고 속은 촉촉하게 구워집니다.',
+      '고기 진열대의 안심·등심·차돌박이는 부위별 특징을 간단히 설명해 두었어요. 눌러서 읽어 보세요.']},
     {name: '로비 안내원', x: 5, z: 11, f: 0, ry: -1.57, c: 0x2d7a4f, pages: [
       '로비에서 파란 패드(▲)는 위층, 주황 패드(▼)는 아래층으로 이동합니다.',
       '이 앱에서는 1층에 선사·고대와 고려·조선·대한제국 전시실, 2층에 기증관·서화관·사유의 방, 3층에 도자·조각공예관과 세계문화관을 배치했습니다. 실제 층별 구성은 박물관 안내도로 확인하세요.',
@@ -1632,11 +1642,12 @@ function extConnect(){
       rect(-28, -34, 28, 16, '#cfc7b4', '#5b5446', 2); txt('국립중앙박물관', 0, -9, 14, '#3a3428');
       rect(-40, 35, -34, 41, '#2a4a8a'); txt('이촌역 2번 출구', -37, 44, 11, '#1b2a4a');
       rect(27, 35, 33, 41, '#c4003a'); txt('판교역', 30, 44, 11, '#5a0020');
+      rect(6, 50, 24, 64, '#e6b8a8', '#7a2a2a', 1.5); txt('현대본가', 15, 57, 11, '#5a1a1a');
       [[86, 40, 8, 6, '기록관 1'], [86, 52, 8, 6, '기록관 2'], [56, 52, 10, 6, '카페 어울림'], [92, 20, 7, 6, '홍보관'], [92, 32, 7, 6, '용산서가'], [70, 58, 9, 6, '놀이터']].forEach(a => { rect(a[0] - a[2] / 2, a[1] - a[3] / 2, a[0] + a[2] / 2, a[1] + a[3] / 2, '#e4d7bd', '#8a7d62'); txt(a[4], a[0], a[1], 10); });
       txt('거울못', 0, 30, 11, '#fff'); txt('호수', 76, 8, 11, '#fff'); txt('분수', 46, 28, 10, '#1b3a5a'); txt('용산어린이정원', 52, 5, 12, '#2d6a3f');
       txt('주출입구', 99, 22, 10, '#2d6a3f'); c.fillStyle = '#2d6a3f'; c.fillRect(X(98.6), Z(24), 0.8 * s + 2, 6 * s);
     } else {
-      ROOMS.filter(r => r.f === floor).forEach(r => {
+      ROOMS.filter(r => r.f === floor && !r.resto).forEach(r => {
         rect(r.x0, r.z0, r.x1, r.z1, mapCol(r), '#5b5446', 1.5);
         const m = r.name.match(/^(.*?)\s*\((.*)\)$/), fs = Math.max(9, Math.min(12, s * 1.7));
         if (r.closed){ txt(m ? m[1] : r.name, r.cx, r.cz - 0.8, fs, '#666'); txt('휴실', r.cx, r.cz + 1.2, fs, '#a03a2a'); }
@@ -1796,6 +1807,7 @@ function extConnect(){
   const SHIRTS = [0xd9534f, 0x4a8fd6, 0xe8b84a, 0x7a5aa8, 0x3f9a6a, 0xe86a8a, 0x8a8a8a, 0xf08a3a, 0x2f6fa0, 0xb85a3a];
   const CLINES = {
     family: ['오늘 날씨 좋다', '토끼 보러 갈까?', '조금만 더 걸으면 카페야', '박물관 구경하고 간식 먹자', '아이가 신났네요'],
+    diners: ['고기 진짜 맛있다', '한 점 더 구울까요?', '오전에 본 전시 얘기해 볼까요', '다 같이 건배!', '불판 좀 갈아 주세요'],
     visitor: ['이 유물은 설명이 자세하네', '조금 더 가까이서 볼까?', '여기 사진 찍어도 되나?', '다음 전시실도 가 보자', '생각보다 크다'],
     kids: ['나 잡아 봐!', '오리다! 오리!', '토끼 어디 있어?', '더 놀고 싶어요', '우와 크다!'],
     couple: ['사진 찍어 줄까?', '여기 분위기 좋다', '다음엔 박물관 안도 천천히 보자', '산책하기 좋은 날이야', '저쪽으로 가 볼까?']
@@ -1829,6 +1841,61 @@ function extConnect(){
   walkers('couple', [[77, 46], [66, 42], [60, 39], [57, 48], [56, 58]], 1.2, 10, [{along: 0, side: -0.8}, {along: 0, side: 0.8}]);
   standers('couple', [0, 33], [Object.assign([-0.9, 41], {}), Object.assign([0.9, 41], {})]);
   standers('family', [60, 34], [Object.assign([58.4, 30.4], {}), Object.assign([60, 30.8], {child: true}), Object.assign([61.6, 30.4], {})]);
+  /* ---- 점심: 현대본가 (소고기 식당, 열린마당 남동쪽 · 개념 구성) ---- */
+  const RS = {x0: 6, z0: 50, x1: 24, z1: 64};
+  const RG = new THREE.Group(), ROOFG = new THREE.Group(), COALS = []; OUT.add(RG); OUT.add(ROOFG);
+  ROOMS.push({f: 0, x0: RS.x0, z0: RS.z0, x1: RS.x1, z1: RS.z1, name: '현대본가 (소고기 식당)', cx: 15, cz: 57, kind: 'resto', resto: true});
+  (function(){
+    const wc = 0xcdb48a, wl = (x0, z0, x1, z1) => { RG.add(box(x1 - x0, 2.4, z1 - z0, wc, (x0 + x1) / 2, 1.2, (z0 + z1) / 2)); WALLS[0].push([x0, z0, x1, z1]); };
+    wl(6, 49.85, 24, 50.15); wl(6, 63.85, 24, 64.15); wl(5.85, 50, 6.15, 64); wl(23.85, 50, 24.15, 55); wl(23.85, 59, 24.15, 64);
+    RG.add(box(0.4, 2.6, 0.4, 0xa32424, 24, 1.3, 55), box(0.4, 2.6, 0.4, 0xa32424, 24, 1.3, 59), box(0.5, 0.45, 4.5, 0xa32424, 24, 2.55, 57));
+    RG.add(box(17.6, 0.05, 13.6, 0x9b7a55, 15, 0.04, 57));
+    ROOFG.add(box(19.2, 0.35, 15.2, 0x5a3a2a, 15, 2.75, 57), box(19.6, 0.2, 15.6, 0x3a2418, 15, 2.55, 57));
+    const sg = tag('현대본가', 5.2, '#fff', 'rgba(163,36,36,.96)', '#f2d27a'); sg.position.set(24.8, 4.1, 57); ROOFG.add(sg);
+    const sg2 = tag('한우 · 소고기 · 점심', 4.6, '#5a1a1a', 'rgba(255,248,230,.97)', '#a32424'); sg2.position.set(24.8, 3.3, 57); ROOFG.add(sg2);
+    [55, 59].forEach(z => { const l = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), M(0xd8302a, {emissive: 0x801010})); l.position.set(24.6, 2.1, z); l.scale.y = 1.25; ROOFG.add(l); });
+    const mk = (x, z) => {
+      RG.add(box(2.0, 0.12, 1.2, 0x4a3020, x, 0.78, z), box(1.6, 0.72, 0.9, 0x3a2418, x, 0.38, z));
+      RG.add(box(0.9, 0.06, 0.9, 0x2a2a2e, x, 0.86, z));
+      const cm = M(0xff6a1a, {emissive: 0xd04a0a, emissiveIntensity: 0.9}); const coal = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.04, 14), cm); coal.position.set(x, 0.9, z); RG.add(coal); COALS.push(cm);
+      RG.add(box(0.5, 0.05, 0.34, 0xf2e9e0, x - 0.65, 0.86, z + 0.3), box(0.14, 0.04, 0.1, 0xc4414b, x - 0.75, 0.9, z + 0.3), box(0.14, 0.04, 0.1, 0x9e2a35, x - 0.55, 0.9, z + 0.32));
+      [[0x4a8a4a, 0.6, -0.3], [0xf4f0e0, 0.6, 0], [0xe8963a, 0.6, 0.3]].forEach(d => { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.05, 10), M(d[0])); c.position.set(x + d[1], 0.87, z + d[2]); RG.add(c); });
+      const hood = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.6, 0.7, 12), M(0x666b72, {metalness: 0.5, roughness: 0.4})); hood.position.set(x, 2.0, z); RG.add(hood);
+      const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.45, 10), M(0x666b72, {metalness: 0.5, roughness: 0.4})); pipe.position.set(x, 2.5, z); RG.add(pipe);
+      [[-0.7, -0.95], [0.7, -0.95], [-0.7, 0.95], [0.7, 0.95]].forEach(o => { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.45, 12), M(0xa32424)); st.position.set(x + o[0], 0.25, z + o[1]); RG.add(st); });
+      ob(x - 1, z - 0.6, x + 1, z + 0.6);
+    };
+    [12.5, 17.5].forEach(x => [53, 57, 61].forEach(z => mk(x, z)));
+    RG.add(box(1.5, 1.0, 9.5, 0x6a4a30, 7.1, 0.5, 57.2)); ob(6.2, 52.4, 8.0, 62);
+    for (let i = 0; i < 7; i++) RG.add(box(0.5, 0.45, 0.4, [0x2a6a8a, 0x6a8a2a, 0x8a4a2a, 0x7a2a6a][i % 4], 6.45, 1.4 + (i % 2) * 0.55, 52.8 + i * 1.3));
+    RG.add(box(1.3, 0.9, 2.5, 0x6a4a30, 22.6, 0.45, 52.3), box(0.5, 0.3, 0.4, 0x222222, 22.6, 1.05, 52.3)); ob(22, 51, 23.3, 53.6);
+    const gl = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.5, 1.0), new THREE.MeshStandardMaterial({color: 0x9ec9e0, transparent: true, opacity: 0.32, roughness: 0.1}));
+    gl.position.set(11, 0.9, 50.8); RG.add(gl); ob(8.9, 50.2, 13.1, 51.4);
+    for (let i = 0; i < 6; i++) RG.add(box(0.55, 0.3, 0.5, i % 2 ? 0xb5303a : 0x9e2a35, 9.5 + i * 0.7, 0.6 + (i % 3) * 0.45, 50.8));
+    const tg = tag('고기 진열대', 3.4, '#fff', 'rgba(120,30,30,.92)', null); tg.position.set(11, 2.2, 51.4); RG.add(tg);
+    const cv = document.createElement('canvas'); cv.width = 640; cv.height = 340; const c = cv.getContext('2d');
+    c.fillStyle = '#2a1a12'; c.fillRect(0, 0, 640, 340); c.strokeStyle = '#d9b46a'; c.lineWidth = 8; c.strokeRect(10, 10, 620, 320);
+    c.fillStyle = '#f2d27a'; c.textAlign = 'center'; c.font = '700 34px ' + FONT; c.fillText('현대본가 · 메뉴 (예시)', 320, 58);
+    c.fillStyle = '#fff'; c.font = '600 26px ' + FONT;
+    ['한우 특수부위 · 안심 · 등심', '차돌박이 · 한우육회', '찌개 · 곰탕 · 열무국수'].forEach((t, i) => c.fillText(t, 320, 118 + i * 48));
+    c.fillStyle = '#c9b48a'; c.font = '500 19px ' + FONT; c.fillText('외부 정보 사이트 기준 · 가격/영업시간 미확인 · 인테리어는 개념 구성', 320, 300);
+    const bm = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 2.76), new THREE.MeshBasicMaterial({map: new THREE.CanvasTexture(cv)})); bm.position.set(18, 1.55, 50.22);
+    const bh = new THREE.Group(); bh.add(bm); RG.add(bh); reg(bh, 'gh_menu', 18, 51.6, 0, '현대본가', 16, null);
+    const gh = new THREE.Group(); const gm = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 6), new THREE.MeshBasicMaterial({visible: false})); gm.position.set(12.5, 1, 57); gh.add(gm); RG.add(gh); reg(gh, 'gh_grill', 12.5, 57, 0, '현대본가');
+    const ch = new THREE.Group(); const cm2 = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.6, 1.2), new THREE.MeshBasicMaterial({visible: false})); cm2.position.set(11, 0.9, 50.8); ch.add(cm2); RG.add(ch); reg(ch, 'gh_case', 11, 51.6, 0, '현대본가');
+  })();
+  Object.assign(DOC, {
+    gh_menu: ['현대본가 · 점심', '점심은 소고기 식당 "현대본가"로 구성했습니다. 외부 정보 사이트(polle.com) 한 곳 기준으로 서울 용산구 이태원로4길 26 1층, 전화 02-793-8118로 표기되어 있고, 한우 특수부위·안심·등심·차돌박이·한우육회와 찌개·곰탕·열무국수 메뉴가 소개되어 있습니다. 한 곳의 정보라 같은 이름의 다른 지점일 수도 있으니 방문과 예약 전에 직접 확인해 주세요. 가격과 영업시간은 확인하지 못해 넣지 않았고, 식당 내부 모습은 이 앱의 개념 구성입니다.'],
+    gh_grill: ['숯불 불판 테이블', '고기 구이 식당의 기본 자리입니다. 일반적으로 불판을 충분히 달군 뒤 한 번에 너무 많이 올리지 않고, 자주 뒤집지 않는 편이 겉은 노릇하고 속은 촉촉하게 익는 데 유리하다고 설명합니다. 테이블 위 후드는 연기를 빨아들이는 환기 장치입니다. (이 앱의 테이블 배치는 개념 구성입니다.)'],
+    gh_case: ['고기 진열대', '소고기 부위의 일반적인 설명입니다. 안심은 등 안쪽의 연한 부위, 등심은 등 쪽의 마블링이 많은 부위, 차돌박이는 양지(가슴 쪽) 부위를 얇게 썬 것입니다. 한우육회는 날고기를 양념해 먹는 메뉴입니다. 이 진열대는 장식이며, 실제 식당의 진열이나 숙성 방식과는 무관합니다.']
+  });
+  const gd = [[12.5, 53, 0.7, -0.95], [12.5, 53, -0.7, -0.95], [17.5, 61, 0.7, 0.95], [17.5, 61, -0.7, 0.95], [17.5, 61, 0.7, -0.95]];
+  standers('diners', [15, 57], gd.map(g => Object.assign([g[0] + g[2], g[1] + g[3]], {})), 0);
+  function resTick(now){
+    const inside = P.f === 0 && P.x > RS.x0 && P.x < RS.x1 && P.z > RS.z0 && P.z < RS.z1;
+    ROOFG.visible = !inside;
+    const p = 0.75 + Math.sin(now / 300) * 0.25; COALS.forEach((m, i) => { m.emissiveIntensity = p + Math.sin(now / 170 + i) * 0.12; });
+  }
   /* 박물관 안 관람객(층별) · 정원 아이들 */
   function freeSpot(x, z, f, face){
     for (const r of [1.4, 2, 2.6]) for (let k = 0; k < 8; k++){ const an = k / 8 * 6.2832, px = x + Math.cos(an) * r, pz = z + Math.sin(an) * r; if (!blocked(px, pz, f)) return [px, pz]; }
@@ -1891,7 +1958,7 @@ function extConnect(){
     });
   }
   function crowdTick(dt, now){
-    animalTick(now);
+    animalTick(now); resTick(now);
     const out = P.f === 0;
     CROWD.forEach(g => {
       if (!g.stand){
@@ -1941,14 +2008,15 @@ function extConnect(){
     add(2, [[-20, -4], [-20, 0]]); st(10, -20, 0, 2);
     add(2, [[-12, 0], [0, 6], [8, 13]]);
     add(1, [[8, 9.5], [8, 13]]);
-    add(0, rp(12)); st(11, 46, 33, 0); add(0, rp(13)); st(12, 77, 46, 0); add(0, rp(14)); st(13, 60, 39, 0); add(0, rp(15)); st(14, 56, 58, 0); add(0, rp(16)); st(15, 86, 27, 0);
+    add(0, rp(12)); st(11, 46, 33, 0); add(0, rp(13)); st(12, 77, 46, 0); add(0, rp(14)); st(13, 60, 39, 0); add(0, rp(15)); st(14, 56, 58, 0); add(0, rp(16)); st(15, 86, 27, 0); add(0, rp(17)); st(16, 20.5, 57, 0);
   })();
   const GTXT = {
     11: '용산어린이정원으로 들어서는 분수정원 구간입니다. 이 앱의 배치는 개념 구성이라 실제 위치와 다를 수 있습니다.',
     12: '기록관 건물이 있는 구간입니다. 건물 안 전시 내용은 이 앱에 포함하지 않았습니다.',
     13: '넓은 잔디마당과 마시멜로 토끼 조형물이 있는 곳으로 구성했습니다.',
     14: '잠시 쉬어 가는 카페 구간입니다.',
-    15: '코스의 마지막 지점입니다. 수고 많으셨습니다. 팀 마무리 이야기를 나눠 보세요.'
+    15: '정원 코스의 끝입니다. 다음은 점심 식사입니다. 노란 화살표를 따라 현대본가로 이동해 보세요.',
+    16: '점심 장소인 소고기 식당 현대본가입니다. 식당 내부는 이 앱의 개념 구성이고, 실제 메뉴·가격·영업시간은 방문 전에 확인해 주세요. 식사하며 팀 마무리 이야기를 나눠 보세요.'
   };
   const TS = () => window.__TS || 1;
   let tPrev = false, tStarted = false, ti = 1, tState = 'walk', tWait = 0, tPadWait = 0;
@@ -2010,7 +2078,7 @@ function extConnect(){
   /* ---- 점프 ---- */
   let jh = 0, vy = 0;
   window.S3.dbg = () => ({jh, f: P.f, x: P.x, z: P.z, held, team: TEAM});
-  window.S3.setTeam = setTeam; window.S3.tp = (x, z, f) => { P.x = x; P.z = z; P.f = f; me.g.position.set(x * K, f * FH * K, z * K); cd = 1; };
+  window.S3.setTeam = setTeam; window.S3.blk = blocked; window.S3.tp = (x, z, f) => { P.x = x; P.z = z; P.f = f; me.g.position.set(x * K, f * FH * K, z * K); cd = 1; };
   /* ---- 모바일 조이스틱 + 점프 버튼 ---- */
   (function(){
     const touch = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || (navigator.maxTouchPoints || 0) > 0;
