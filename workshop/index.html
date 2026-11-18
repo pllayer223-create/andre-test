@@ -117,7 +117,9 @@ textarea:disabled{opacity:.55}
 #teambtn{position:absolute;right:10px;top:50px;z-index:3;background:rgba(255,255,255,.93);color:#2d7a4f;border:0;border-radius:999px;min-height:32px;padding:2px 10px;font-size:12px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,.15)}
 #pickbtn{position:absolute;right:10px;bottom:140px;z-index:3;background:#6a4aa8;color:#fff;border:0;border-radius:999px;min-height:38px;padding:4px 16px;font-size:13px;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25);max-width:calc(100% - 20px)}
 #stage.touch #pickbtn{bottom:218px}
-#pickbtn[hidden],#teamsel[hidden]{display:none}
+#sitbtn{position:absolute;right:10px;bottom:184px;z-index:3;background:#c2571f;color:#fff;border:0;border-radius:999px;min-height:38px;padding:4px 16px;font-size:13px;font-weight:600;box-shadow:0 2px 10px rgba(0,0,0,.25);max-width:calc(100% - 20px)}
+#stage.touch #sitbtn{bottom:262px}
+#pickbtn[hidden],#sitbtn[hidden],#teamsel[hidden]{display:none}
 #teamsel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:8;width:min(320px,calc(100% - 32px));background:#fff;color:#14201a;border-radius:16px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.35);text-align:center}
 #teamsel .tt{font-weight:700;font-size:15px;margin-bottom:12px}
 #teamsel .to{display:flex;flex-direction:column;gap:8px}
@@ -146,7 +148,7 @@ textarea:disabled{opacity:.55}
     <canvas id="cv"></canvas>
     <div class="hud hud-tl" id="hud-tl" role="button" tabindex="0" aria-expanded="true" title="누르면 접기/펼치기"><div class="hs">국립중앙박물관 관람 코스</div><div class="ht">자금운용본부 워크샵</div><div class="hc" id="h-count">1명 접속</div><div class="hc"><span id="h-arr" style="display:inline-block;font-weight:700;color:#2d7a4f">↑</span> <span id="h-dest"></span></div></div>
     <div class="hud hud-pl"><span id="h-place"></span><button id="h-change">장소 변경</button><button id="h-map">목적지로 이동</button></div>
-    <div class="cap">WASD/방향키 이동 · Space 점프 · Q/E 시점 · 전시품 클릭 또는 F키로 설명 · M키 약도 · G 유물 줍기/내려놓기 · Enter 말풍선 채팅 · 노란 별 모으기(레벨업) · 파란/주황 패드로 층 이동 · 전시품은 임의 구성</div>
+    <div class="cap">WASD/방향키 이동 · Space 점프 · Q/E 시점 · 전시품 클릭 또는 F키로 설명 · M키 약도 · G 유물 줍기/내려놓기 · C 앉기/일어나기 · Enter 말풍선 채팅 · 노란 별 모으기(레벨업) · 파란/주황 패드로 층 이동 · 전시품은 임의 구성</div>
     <button id="saybtn">말하기</button>
     <div id="entry"><div class="ec">
       <h2>자금운용본부 워크샵</h2>
@@ -166,6 +168,7 @@ textarea:disabled{opacity:.55}
     <button id="diagbtn">접속진단</button>
     <div id="diag" hidden></div>
     <button id="pickbtn" hidden></button>
+    <button id="sitbtn" hidden></button>
     <div id="teamsel" hidden>
       <div class="tt">내 이름</div>
       <div class="nr"><input id="nick-in" maxlength="12" autocomplete="off"><button id="nick-save">저장</button></div>
@@ -1108,7 +1111,7 @@ function extConnect(){
       if (okB(x + 4, 25.2)) LAMPS.push([x + 4, 25.2]);
     }
     for (let z = 36; z <= 60; z += 8) [[52.6, 1.57], [59.4, -1.57]].forEach(a => { if (okB(a[0], z)) BENCHES.push([a[0], z, a[1]]); });
-    window.__BENCHES = BENCHES.length;
+    window.__BENCHES = BENCHES.length; window.__BL = BENCHES;
   })();
   BENCHES.forEach(a => {
     const b = new THREE.Group(); b.add(box(2, 0.12, 0.7, 0x9a6a3a, 0, 0.5, 0), box(2, 0.6, 0.1, 0x9a6a3a, 0, 0.9, -0.3), box(0.1, 0.5, 0.6, 0x555555, -0.8, 0.25, 0), box(0.1, 0.5, 0.6, 0x555555, 0.8, 0.25, 0));
@@ -1301,10 +1304,10 @@ function extConnect(){
   function pub(force){
     if (!R || !window.__ENTERED) return;
     const now = Date.now();
-    const ch = Math.hypot(P.x - lastSent.x, P.z - lastSent.z) > 0.4 || P.f !== lastSent.f || cur !== lastSent.s || isGuide !== lastSent.g || got.size !== lastSent.k || TEAM !== lastSent.tm || LOOK !== lastSent.lk;
+    const ch = Math.hypot(P.x - lastSent.x, P.z - lastSent.z) > 0.4 || P.f !== lastSent.f || cur !== lastSent.s || isGuide !== lastSent.g || got.size !== lastSent.k || TEAM !== lastSent.tm || LOOK !== lastSent.lk || !!seat !== lastSent.q;
     if (!force && (!ch || now - lastPub < 250)) return;
-    lastPub = now; lastSent = {x: P.x, z: P.z, f: P.f, s: cur, g: isGuide, k: got.size, tm: TEAM, lk: LOOK};
-    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, l: LOOK, v: 25}).catch(() => {});
+    lastPub = now; lastSent = {x: P.x, z: P.z, f: P.f, s: cur, g: isGuide, k: got.size, tm: TEAM, lk: LOOK, q: !!seat};
+    R.presence({s: cur, g: isGuide, n: NICK, x: Math.round(P.x * 10) / 10, z: Math.round(P.z * 10) / 10, f: P.f, k: got.size, c: CHAT, t: TEAM, l: LOOK, q: seat ? 1 : 0, v: 26}).catch(() => {});
   }
   const num = v => (typeof v === 'number' && isFinite(v)) ? v : null;
   let lastRoom = '', lastInside = null;
@@ -1325,6 +1328,7 @@ function extConnect(){
       a.tx = Math.max(-45, Math.min(110, x)); a.tz = Math.max(-45, Math.min(75, z)); a.f = Math.round(f);
       const pk = num(pr.k), pt = num(pr.t), ptv = (pt !== null && pt >= 0 && pt < 5) ? Math.round(pt) : -1;
       const pl = num(pr.l); applyLook(a, pl !== null && pl >= 0 && pl < 100000 ? Math.round(pl) : 0);
+      a.sit = pr.q === 1;
       if (ptv >= 0) a.body.material.color.set(TEAMC[ptv]);
       dress(a, ptv, pk !== null ? lvOf(Math.max(0, Math.min(99, pk))) : 1);
       setTag(a, (ptv >= 0 ? TEAMN[ptv].slice(0, 2) + ' ' : '') + (pk !== null ? 'Lv.' + lvOf(Math.max(0, Math.min(99, pk))) + ' ' : '') + ((typeof pr.n === 'string' && pr.n.trim()) ? pr.n.trim().slice(0, 16) : '참가자'), false, pr.g === true, ptv >= 0 ? TEAMC[ptv] : null);
@@ -1802,6 +1806,35 @@ function extConnect(){
     if (!txt){ b.hidden = true; pickKey = ''; return; } if (txt !== pickKey){ b.textContent = txt; pickKey = txt; } b.hidden = false;
   }
 
+  /* ---- 앉기: 식당 스툴 · 정원 벤치 ---- */
+  let seat = null; const SITDY = -0.1;
+  function seatList(){
+    const L = [];
+    (window.__STOOLS || []).forEach(a => L.push({x: a[0], z: a[1], r: a[2], y: 0.475}));
+    (window.__BL || []).forEach(a => { const c = Math.cos(a[2]), sn = Math.sin(a[2]); [-0.5, 0.5].forEach(o => L.push({x: a[0] + c * o, z: a[1] - sn * o, r: a[2], y: 0.56})); });
+    return L;
+  }
+  let SEATS = null;
+  function nearSeat(){
+    if (P.f !== 0) return null; if (!SEATS) SEATS = seatList();
+    let best = null, bd = 1.7;
+    SEATS.forEach(s => { const d = Math.hypot(s.x - P.x, s.z - P.z); if (d < bd){ bd = d; best = s; } });
+    return best;
+  }
+  function sitDown(s){
+    if (seat || !s) return; if (held >= 0) dropHeld();
+    seat = s; P.x = s.x; P.z = s.z; jh = 0; vy = 0; me.g.rotation.y = s.r; cd = 1; pub(true); toast('앉았습니다 · 움직이거나 Space/C를 누르면 일어납니다');
+  }
+  function standUp(){ if (!seat) return; const s = seat; seat = null; P.x = s.x - Math.sin(s.r) * 1.1; P.z = s.z - Math.cos(s.r) * 1.1; if (blocked(P.x, P.z, P.f)){ P.x = s.x; P.z = s.z; } pub(true); }
+  function toggleSit(){ if (seat) standUp(); else sitDown(nearSeat()); }
+  $h('sitbtn').onclick = toggleSit;
+  window.addEventListener('keydown', e => { const t = e.target && e.target.tagName; if (t === 'TEXTAREA' || t === 'INPUT' || e.repeat) return; if (e.key.toLowerCase() === 'c') toggleSit(); });
+  let sitKey = '';
+  function sitTick(){
+    const b = $h('sitbtn'); let txt = seat ? '일어나기 (C)' : (nearSeat() ? '앉기 (C)' : '');
+    if (!txt){ b.hidden = true; sitKey = ''; return; } if (txt !== sitKey){ b.textContent = txt; sitKey = txt; } b.hidden = false;
+  }
+
   /* ---- 일반 방문객 NPC (가족·연인) ---- */
   const CROWD = [];
   const SHIRTS = [0xd9534f, 0x4a8fd6, 0xe8b84a, 0x7a5aa8, 0x3f9a6a, 0xe86a8a, 0x8a8a8a, 0xf08a3a, 0x2f6fa0, 0xb85a3a];
@@ -1843,6 +1876,7 @@ function extConnect(){
   standers('family', [60, 34], [Object.assign([58.4, 30.4], {}), Object.assign([60, 30.8], {child: true}), Object.assign([61.6, 30.4], {})]);
   /* ---- 점심: 현대본가 (소고기 식당, 열린마당 남동쪽 · 개념 구성) ---- */
   const RS = {x0: 6, z0: 50, x1: 24, z1: 64};
+  window.__STOOLS = [];
   const RG = new THREE.Group(), ROOFG = new THREE.Group(), COALS = []; OUT.add(RG); OUT.add(ROOFG);
   ROOMS.push({f: 0, x0: RS.x0, z0: RS.z0, x1: RS.x1, z1: RS.z1, name: '현대본가 (소고기 식당)', cx: 15, cz: 57, kind: 'resto', resto: true});
   (function(){
@@ -1862,7 +1896,7 @@ function extConnect(){
       [[0x4a8a4a, 0.6, -0.3], [0xf4f0e0, 0.6, 0], [0xe8963a, 0.6, 0.3]].forEach(d => { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.05, 10), M(d[0])); c.position.set(x + d[1], 0.87, z + d[2]); RG.add(c); });
       const hood = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.6, 0.7, 12), M(0x666b72, {metalness: 0.5, roughness: 0.4})); hood.position.set(x, 2.0, z); RG.add(hood);
       const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.45, 10), M(0x666b72, {metalness: 0.5, roughness: 0.4})); pipe.position.set(x, 2.5, z); RG.add(pipe);
-      [[-0.7, -0.95], [0.7, -0.95], [-0.7, 0.95], [0.7, 0.95]].forEach(o => { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.45, 12), M(0xa32424)); st.position.set(x + o[0], 0.25, z + o[1]); RG.add(st); });
+      [[-0.7, -0.95], [0.7, -0.95], [-0.7, 0.95], [0.7, 0.95]].forEach(o => { const st = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.45, 12), M(0xa32424)); st.position.set(x + o[0], 0.25, z + o[1]); RG.add(st); window.__STOOLS.push([x + o[0], z + o[1], Math.atan2(-o[0], -o[1])]); });
       ob(x - 1, z - 0.6, x + 1, z + 0.6);
     };
     [12.5, 17.5].forEach(x => [53, 57, 61].forEach(z => mk(x, z)));
@@ -2078,7 +2112,7 @@ function extConnect(){
   /* ---- 점프 ---- */
   let jh = 0, vy = 0;
   window.S3.dbg = () => ({jh, f: P.f, x: P.x, z: P.z, held, team: TEAM});
-  window.S3.setTeam = setTeam; window.S3.blk = blocked; window.S3.tp = (x, z, f) => { P.x = x; P.z = z; P.f = f; me.g.position.set(x * K, f * FH * K, z * K); cd = 1; };
+  window.S3.sit = () => { SEATS = null; const s = nearSeat(); sitDown(s); return !!seat; }; window.S3.setTeam = setTeam; window.S3.blk = blocked; window.S3.tp = (x, z, f) => { P.x = x; P.z = z; P.f = f; me.g.position.set(x * K, f * FH * K, z * K); cd = 1; };
   /* ---- 모바일 조이스틱 + 점프 버튼 ---- */
   (function(){
     const touch = (window.matchMedia && matchMedia('(pointer: coarse)').matches) || (navigator.maxTouchPoints || 0) > 0;
@@ -2113,6 +2147,7 @@ function extConnect(){
     if (keys['q']) theta += dt * 1.8; if (keys['e']) theta -= dt * 1.8; if (keys['=']) dist = Math.max(4, dist - dt * 6); if (keys['-']) dist = Math.min(14, dist + dt * 6);
     const il = Math.hypot(ix, iy); if (il > 1){ ix /= il; iy /= il; }
     let moving = il > 0.1;
+    if (seat){ if (moving || keys[' '] || tour) standUp(); else moving = false; }
     if (tourStep(dt, il > 0.1) === 1) moving = true;
     if (il > 0.1){
       const fx = -Math.sin(theta), fz = -Math.cos(theta), rx = Math.cos(theta), rz = -Math.sin(theta);
@@ -2124,6 +2159,7 @@ function extConnect(){
     if (keys[' '] && jh <= 0.001 && vy <= 0) vy = 7.5;
     vy -= 24 * dt; jh += vy * dt; if (jh <= 0){ jh = 0; vy = 0; }
     anim(me, moving, dt); me.g.position.set(P.x * K, (P.f * FH + jh) * K, P.z * K);
+    if (seat){ me.legL.rotation.x = me.legR.rotation.x = -1.45; me.g.position.y += SITDY; me.g.position.x = P.x * K; me.g.position.z = P.z * K; }
     // stairs
     if (cd > 0) cd -= dt;
     else PADS.forEach(p => {
@@ -2135,11 +2171,12 @@ function extConnect(){
       const mv = d > 0.1;
       if (mv){ const s = Math.min(d, 6 * dt); a.g.position.x += gx / d * s; a.g.position.z += gz / d * s; a.g.rotation.y = Math.atan2(gx, gz); }
       a.g.position.y = a.f * FH * K; a.g.visible = a.f === P.f; anim(a, mv, dt);
+      if (a.sit && !mv){ a.legL.rotation.x = a.legR.rotation.x = -1.45; a.g.position.y += SITDY; }
     });
     G.forEach((g, i) => { g.visible = i === P.f; }); OUT.visible = P.f === 0;
     spinners.forEach(n => { n.rotation.y += dt * 0.5; });
     collectStars(dt, now);
-    npcTick(dt, now); bubbleTick(now); pickTick(); crowdTick(dt, now);
+    npcTick(dt, now); bubbleTick(now); pickTick(); sitTick(); crowdTick(dt, now);
     // beacon
     const s = SP[cur];
     if (s){
